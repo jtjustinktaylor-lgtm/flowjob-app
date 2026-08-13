@@ -43,7 +43,15 @@ const Quotes = {
   new() {
     const id = App.genId();
     const num = App.state.nextQuoteNum++;
-    App.state.quotes.push({ id, number: num, date: App.today(), customer:'', customerEmail:'', items:[], notes:'', status:'pending', subtotal:0, tax:0, total:0, taxExempt:false });
+    const items = [];
+    if (App.state.autoServiceCall) {
+      const price = parseFloat(App.state.serviceCallPrice) || 99;
+      items.push({ desc: 'Service Call', price });
+    }
+    const subtotal = items.reduce((s, i) => s + i.price, 0);
+    const tax = +(subtotal * TAX_RATE).toFixed(2);
+    const total = +(subtotal + tax).toFixed(2);
+    App.state.quotes.push({ id, number: num, date: App.today(), customer:'', customerEmail:'', items, notes:'', status:'pending', subtotal, tax, total, taxExempt:false });
     App.saveState();
     this.edit(id);
   },
@@ -123,6 +131,7 @@ const Quotes = {
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="Quotes._print('${q.id}')">🖨️ Print</button>
         <button class="btn btn-outline" onclick="Quotes._emailQuoteDirect('${q.id}')">📧 Email</button>
+        <button class="btn btn-outline" onclick="Quotes._shareQuote('${q.id}')">🔗 Share Quote</button>
         <button class="btn btn-outline" onclick="Quotes._save('${q.id}');App.closeModal()">Save</button>
         <button class="btn btn-primary" onclick="Quotes._save('${q.id}');Quotes._send('${q.id}');App.closeModal()">Save & Send</button>
       </div>`;
@@ -224,6 +233,7 @@ const Quotes = {
       `\n\nSubtotal: ${App.formatCurrency(q.subtotal)}\nHST: ${App.formatCurrency(q.tax)}\nTotal: ${App.formatCurrency(q.total)}` +
       (q.discountAmount ? `\nDiscount: -${App.formatCurrency(q.discountAmount)}` : '') +
       (q.depositAmount ? `\n\nDeposit required: ${App.formatCurrency(q.depositAmount)}` : '') +
+      (biz.hstNumber ? `\nHST#: ${biz.hstNumber}` : '') +
       `\n\nPlease reply to confirm or call ${biz.phone}.\n\nThanks,\n${biz.contact}\n${biz.name}`;
     window.open(`mailto:${q.customerEmail}?subject=Quote #${q.number} — ${biz.name}&body=${encodeURIComponent(body)}`);
   },
@@ -237,7 +247,10 @@ const Quotes = {
       id: invId, number: invNum, date: App.today(), dueDate: '',
       customer: q.customer, customerEmail: q.customerEmail,
       items: [...q.items], notes: q.notes, status: 'unpaid',
-      subtotal: q.subtotal, tax: q.tax, total: q.total, quoteId: q.id
+      subtotal: q.subtotal, tax: q.tax, total: q.total, quoteId: q.id,
+      taxExempt: q.taxExempt || false,
+      discountId: q.discountId || '', discountAmount: q.discountAmount || 0,
+      depositType: q.depositType || 'none', depositValue: q.depositValue || 0, depositAmount: q.depositAmount || 0
     });
     q.status = 'accepted'; App.saveState();
     App.toast('Invoice created from quote');
@@ -281,6 +294,7 @@ const Quotes = {
     this._save(id);
     const q = App.state.quotes.find(x => x.id === id);
     if (!q) return;
+    const biz = App.getBusinessInfo();
     const rows = q.items.map(i => `<tr><td>${App.esc(i.desc)}</td><td style="text-align:right">${App.formatCurrency(i.price)}</td></tr>`).join('');
     App.printSection(`
       <div style="display:flex;justify-content:space-between;margin-bottom:24px">
@@ -297,7 +311,12 @@ const Quotes = {
       ${q.notes ? '<div style="margin-top:24px"><strong>Notes:</strong><br>' + App.esc(q.notes) + '</div>' : ''}
       ${q.depositAmount ? '<div style="margin-top:16px;padding:12px;background:#FFFBEB;border:1px solid #D4AF37;border-radius:6px"><strong>Deposit Required:</strong> ' + App.formatCurrency(q.depositAmount) + '</div>' : ''}
       <div style="margin-top:32px;padding-top:16px;border-top:1px solid #ddd;font-size:12px;color:#666">
-        This quote is valid for 30 days. To accept, call ${App.getBusinessInfo().phone} or reply to this quote.
+        <strong>${App.esc(biz.name)}</strong><br>
+        ${App.esc(biz.contact)}<br>
+        ${App.esc(biz.address)}<br>
+        Tel: ${App.esc(biz.phone)}${biz.hstNumber ? ' | HST: ' + App.esc(biz.hstNumber) : ''}
+        <br><br>
+        This quote is valid for 30 days. To accept, call ${App.esc(biz.phone)} or reply to this quote.
       </div>`, 'Quote #' + q.number);
   },
   _emailQuoteDirect(id) {
@@ -308,5 +327,84 @@ const Quotes = {
     this._emailQuote(q);
     q.status = 'sent'; App.saveState(); App.handleRoute();
     App.toast('Email client opened');
+  },
+  _shareQuote(id) {
+    this._save(id);
+    const q = App.state.quotes.find(x => x.id === id);
+    if (!q) return;
+    const biz = App.getBusinessInfo();
+    const rows = q.items.map(i => `<tr><td style="padding:10px 12px;border-bottom:1px solid #eee">${App.esc(i.desc)}</td><td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">${App.formatCurrency(i.price)}</td></tr>`).join('');
+    const acceptSubject = encodeURIComponent(`Accept Quote #${q.number} — ${biz.name}`);
+    const acceptBody = encodeURIComponent(`Hi,\n\nI would like to accept Quote #${q.number}.\n\nThank you.`);
+    const declineSubject = encodeURIComponent(`Re: Quote #${q.number} — ${biz.name}`);
+    const declineBody = encodeURIComponent(`Hi,\n\nI have decided not to proceed with Quote #${q.number} at this time.\n\nThank you.`);
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quote #${q.number} — ${App.esc(biz.name)}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f7fa;color:#333;line-height:1.5}
+  .container{max-width:680px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.08);overflow:hidden}
+  .header{background:linear-gradient(135deg,#1a2332,#2d3f54);color:#fff;padding:32px 40px}
+  .header h1{font-size:24px;font-weight:700;margin-bottom:4px}
+  .header p{opacity:.85;font-size:14px}
+  .body{padding:32px 40px}
+  .quote-info{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px;padding:16px;background:#f8f9fb;border-radius:8px;font-size:14px}
+  .quote-info div strong{display:block;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+  table{width:100%;border-collapse:collapse;margin:20px 0}
+  th{background:#f8f9fb;padding:10px 12px;text-align:left;font-size:12px;text-transform:uppercase;color:#666;border-bottom:2px solid #e5e7eb}
+  .totals{margin-top:20px;text-align:right;font-size:14px}
+  .totals .row{padding:4px 0}
+  .totals .total{font-size:22px;font-weight:700;color:#1a2332;margin-top:8px;padding-top:8px;border-top:2px solid #1a2332}
+  .deposit-box{margin-top:20px;padding:16px;background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;font-size:14px}
+  .deposit-box strong{color:#b45309}
+  .actions{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+  .btn-accept{background:#16a34a;color:#fff;padding:12px 28px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
+  .btn-decline{background:#fff;color:#666;padding:12px 28px;border:1px solid #d1d5db;border-radius:8px;font-size:15px;cursor:pointer;text-decoration:none;display:inline-block}
+  .btn-accept:hover{background:#15803d}
+  .btn-decline:hover{background:#f9fafb}
+  .footer{padding:24px 40px;background:#f8f9fb;border-top:1px solid #e5e7eb;font-size:12px;color:#666;text-align:center}
+  .notes{margin-top:20px;padding:16px;background:#f0f7ff;border-radius:8px;font-size:14px}
+  @media(max-width:600px){.container{margin:0;border-radius:0}.header,.body,.footer{padding:24px 20px}}
+</style></head><body>
+<div class="container">
+  <div class="header">
+    <h1>${App.esc(biz.name)}</h1>
+    <p>Professional Quote</p>
+  </div>
+  <div class="body">
+    <div class="quote-info">
+      <div><strong>Quote Number</strong>#${q.number}</div>
+      <div><strong>Date</strong>${App.formatDate(q.date)}</div>
+      <div><strong>Prepared For</strong>${App.esc(q.customer || 'Valued Customer')}</div>
+      <div><strong>Valid Until</strong>${App.formatDate(new Date(new Date(q.date).getTime() + 30*86400000).toISOString().slice(0,10))}</div>
+    </div>
+    <table>
+      <thead><tr><th style="text-align:left">Service</th><th style="text-align:right">Price</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="totals">
+      <div class="row">Subtotal: ${App.formatCurrency(q.subtotal)}</div>
+      ${q.discountAmount ? `<div class="row" style="color:#16a34a">Discount: -${App.formatCurrency(q.discountAmount)}</div>` : ''}
+      <div class="row">${q.taxExempt ? 'HST: Exempt' : 'HST (13%): ' + App.formatCurrency(q.tax)}</div>
+      <div class="total">Total: ${App.formatCurrency(q.total)}</div>
+    </div>
+    ${q.depositAmount ? `<div class="deposit-box"><strong>Deposit Required:</strong> ${App.formatCurrency(q.depositAmount)}${q.depositType==='percent'?' ('+q.depositValue+'% of total)':''} due upon acceptance</div>` : ''}
+    ${q.notes ? `<div class="notes"><strong>Notes:</strong><br>${App.esc(q.notes)}</div>` : ''}
+    <div class="actions">
+      <a class="btn-accept" href="mailto:${App.esc(biz.email)}?subject=${acceptSubject}&body=${acceptBody}">✓ Accept Quote</a>
+      <a class="btn-decline" href="mailto:${App.esc(biz.email)}?subject=${declineSubject}&body=${declineBody}">✕ Decline</a>
+    </div>
+  </div>
+  <div class="footer">
+    <strong>${App.esc(biz.name)}</strong> · ${App.esc(biz.address)}<br>
+    Tel: ${App.esc(biz.phone)} · Email: ${App.esc(biz.email)}${biz.hstNumber ? ' · HST: ' + App.esc(biz.hstNumber) : ''}<br>
+    <span style="margin-top:4px;display:inline-block">This quote is valid for 30 days from the date issued.</span>
+  </div>
+</div>
+</body></html>`);
+    win.document.close();
+    App.toast('Share page opened in new tab');
   }
 };
