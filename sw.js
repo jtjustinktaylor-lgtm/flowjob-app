@@ -1,4 +1,4 @@
-const CACHE = 'flowjob-v4';
+const CACHE = 'flowjob-v5';
 const ASSETS = [
   './', './index.html', './style.css', './app.js',
   './icons.js', './signature.js', './data/flat-rates.js',
