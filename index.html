@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowJob — Plumbing Business Manager</title>
+  <meta name="theme-color" content="#D4AF37">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#92400e;color:#fef3c7;text-align:center;padding:8px 16px;font-size:14px;font-weight:600">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#fbbf24;margin-right:8px;animation:pulse 1.5s infinite"></span>
+      You're offline — changes save locally and won't be lost
+    </div>
+
+  <!-- Splash Screen -->
+  <div id="splash-screen">
+    <div class="splash-icon">🔧</div>
+    <h1 class="splash-title">FlowJob</h1>
+    <p class="splash-subtitle">Plumbing Business Manager</p>
+  </div>
+
+  <div id="app">
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar">
+      <div class="brand">
+        <div class="logo-icon">🔧</div>
+        <div class="brand-text">
+          <h1>FlowJob</h1>
+          <span>Plumbing Manager</span>
+        </div>
+      </div>
+      <ul class="nav-links">
+        <li class="nav-section-label">Daily</li>
+        <li><a href="#dashboard" class="nav-link active" data-page="dashboard">
+          <span class="icon" id="nav-icon-dashboard"></span><span class="label">Dashboard</span>
+        </a></li>
+        <li><a href="#scheduler" class="nav-link" data-page="scheduler">
+          <span class="icon" id="nav-icon-scheduler"></span><span class="label">Scheduler</span>
+        </a></li>
+        <li><a href="#eod" class="nav-link" data-page="eod">
+          <span class="icon" id="nav-icon-eod"></span><span class="label">End-of-Day</span>
+        </a></li>
+        <li class="nav-section-label">Billing</li>
+        <li><a href="#quotes" class="nav-link" data-page="quotes">
+          <span class="icon" id="nav-icon-quotes"></span><span class="label">Quotes</span>
+        </a></li>
+        <li><a href="#invoices" class="nav-link" data-page="invoices">
+          <span class="icon" id="nav-icon-invoices"></span><span class="label">Invoices</span>
+        </a></li>
+        <li><a href="#customers" class="nav-link" data-page="customers">
+          <span class="icon" id="nav-icon-customers"></span><span class="label">Customers</span>
+        </a></li>
+        <li class="nav-section-label">Operations</li>
+        <li><a href="#maintenance" class="nav-link" data-page="maintenance">
+          <span class="icon" id="nav-icon-maintenance"></span><span class="label">Maintenance</span>
+        </a></li>
+        <li><a href="#warranty" class="nav-link" data-page="warranty">
+          <span class="icon" id="nav-icon-warranty"></span><span class="label">Warranty</span>
+        </a></li>
+        <li><a href="#followups" class="nav-link" data-page="followups">
+          <span class="icon" id="nav-icon-followups"></span><span class="label">Follow-Ups</span>
+        </a></li>
+        <li><a href="#mileage" class="nav-link" data-page="mileage">
+          <span class="icon" id="nav-icon-mileage"></span><span class="label">Mileage</span>
+        </a></li>
+        <li><a href="#inventory" class="nav-link" data-page="inventory">
+          <span class="icon" id="nav-icon-inventory"></span><span class="label">Inventory</span>
+        </a></li>
+        <li><a href="#warrantyTracker" class="nav-link" data-page="warrantyTracker">
+          <span class="icon" id="nav-icon-warranty-tracker"></span><span class="label">Warranty Tracker</span>
+        </a></li>
+        <li><a href="#serviceHistory" class="nav-link" data-page="serviceHistory">
+          <span class="icon" id="nav-icon-service-history"></span><span class="label">Service History</span>
+        </a></li>
+        <li class="nav-section-label">Revenue</li>
+        <li><a href="#price-book" class="nav-link" data-page="price-book">
+          <span class="icon" id="nav-icon-price-book"></span><span class="label">Price Book</span>
+        </a></li>
+        <li><a href="#memberships" class="nav-link" data-page="memberships">
+          <span class="icon" id="nav-icon-memberships"></span><span class="label">Memberships</span>
+        </a></li>
+        <li><a href="#reviews" class="nav-link" data-page="reviews">
+          <span class="icon" id="nav-icon-reviews"></span><span class="label">Reviews</span>
+        </a></li>
+        <li><a href="#email-marketing" class="nav-link" data-page="email-marketing">
+          <span class="icon" id="nav-icon-email"></span><span class="label">Email Marketing</span>
+        </a></li>
+        <li class="nav-section-label">Compliance</li>
+        <li><a href="#contracts" class="nav-link" data-page="contracts">
+          <span class="icon" id="nav-icon-contracts"></span><span class="label">Contracts</span>
+        </a></li>
+        <li><a href="#insurance" class="nav-link" data-page="insurance">
+          <span class="icon" id="nav-icon-insurance"></span><span class="label">Insurance Claims</span>
+        </a></li>
+        <li><a href="#employees" class="nav-link" data-page="employees">
+          <span class="icon" id="nav-icon-employees"></span><span class="label">Employees</span>
+        </a></li>
+        <li class="nav-section-label">Tools</li>
+        <li><a href="#estimator" class="nav-link" data-page="estimator">
+          <span class="icon" id="nav-icon-estimator"></span><span class="label">Plumbing Estimator</span>
+        </a></li>
+        <li><a href="#photo-report" class="nav-link" data-page="photo-report">
+          <span class="icon" id="nav-icon-photo-report"></span><span class="label">Photo Reports</span>
+        </a></li>
+        <li><a href="#paxeer" class="nav-link" data-page="paxeer">
+          <span class="icon" id="nav-icon-paxeer"></span><span class="label">Paxeer Swap</span>
+        </a></li>
+        <li class="nav-section-label">Settings</li>
+        <li><a href="#rates" class="nav-link" data-page="rates">
+          <span class="icon" id="nav-icon-rates"></span><span class="label">Rates</span>
+        </a></li>
+        <li><a href="#tracker" class="nav-link" data-page="tracker">
+          <span class="icon" id="nav-icon-tracker"></span><span class="label">Profit Tracker</span>
+        </a></li>
+        <li><a href="#discounts" class="nav-link" data-page="discounts">
+          <span class="icon" id="nav-icon-discounts"></span><span class="label">Discounts</span>
+        </a></li>
+        <li><a href="#analytics" class="nav-link" data-page="analytics">
+          <span class="icon" id="nav-icon-analytics"></span><span class="label">Analytics</span>
+        </a></li>
+        <li><a href="#settings" class="nav-link" data-page="settings">
+          <span class="icon" id="nav-icon-settings"></span><span class="label">Settings</span>
+        </a></li>
+        <li><a href="#settings/payments" class="nav-link" data-page="settingsPayments">
+          <span class="icon" id="nav-icon-payment-settings"></span><span class="label">🍁 Payments</span>
+        </a></li>
+        <li><a href="#export" class="nav-link" data-page="export">
+          <span class="icon" id="nav-icon-export"></span><span class="label">Export</span>
+        </a></li>
+        <li><a href="#storage" class="nav-link" data-page="storage">
+          <span class="icon" id="nav-icon-storage"></span><span class="label">Storage</span>
+        </a></li>
+      </ul>
+      <div class="sidebar-actions">
+        <button class="sidebar-action-btn" id="cmd-palette-btn" title="Search (Ctrl+K)">
+          <span id="cmd-icon"></span>
+          <span class="label">Search</span>
+          <kbd>Ctrl+K</kbd>
+        </button>
+        <button class="sidebar-action-btn" id="dark-mode-toggle" title="Toggle dark mode">
+          <span id="theme-icon"></span>
+        </button>
+      </div>
+      <div class="sidebar-footer">
+        <div class="contact-info">
+          <small id="sidebar-contact">Justin Taylor</small>
+          <small id="sidebar-phone">519-350-8772</small>
+          <small id="sidebar-address">Chatham, ON</small>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile Header -->
+    <header id="mobile-header">
+      <button id="menu-toggle" aria-label="Toggle menu">☰</button>
+      <h1>FlowJob — Plumbing Manager</h1>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="content">
+      <!-- Pages are rendered here by JS -->
+    </main>
+  </div>
+
+  <!-- Modal Overlay -->
+  <div id="modal-overlay" class="hidden">
+    <div id="modal-content"></div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container"></div>
+
+  <script src="data/flat-rates.js"></script>
+  <script src="icons.js"></script>
+  <script src="signature.js"></script>
+  <script src="app.js"></script>
+  <script src="pages/dashboard.js"></script>
+  <script src="pages/quotes.js"></script>
+  <script src="pages/invoices.js"></script>
+  <script src="pages/scheduler.js"></script>
+  <script src="pages/rates.js"></script>
+  <script src="pages/customers.js"></script>
+  <script src="pages/tracker.js"></script>
+  <script src="pages/maintenance.js"></script>
+  <script src="pages/warranty.js"></script>
+  <script src="pages/eod.js"></script>
+  <script src="pages/discounts.js"></script>
+  <script src="pages/followups.js"></script>
+  <script src="pages/settings.js"></script>
+  <script src="pages/quote-request.js"></script>
+  <script src="pages/customer-detail.js"></script>
+  <script src="pages/mileage.js"></script>
+  <script src="pages/inventory.js"></script>
+  <script src="pages/export.js"></script>
+  <script src="pages/storage.js"></script>
+  <script src="modules/calendar-integration.js"></script>
+  <script src="modules/review-reputation.js"></script>
+  <script src="modules/email-marketing.js"></script>
+  <script src="modules/contract-legal.js"></script>
+  <script src="modules/employee-management.js"></script>
+  <script src="modules/insurance-claims.js"></script>
+  <script src="modules/membership-subscription.js"></script>
+  <script src="modules/price-book-manager.js"></script>
+  <script src="modules/data-dashboard.js"></script>
+  <script src="modules/plumbing-estimator.js"></script>
+  <script src="modules/paxeer-swap.js"></script>
+  <script src="modules/job-site-reporter.js"></script>
+  <script src="modules/payment-settings.js"></script>
+  <script src="modules/warranty-tracker.js"></script>
+  <script src="modules/service-history.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
