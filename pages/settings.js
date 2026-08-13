@@ -22,6 +22,24 @@ Pages.settings = function() {
       <a href="#settings/payments" class="btn btn-primary">⚙️ Open Payment Settings</a>
     </div>
 
+    <div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary)">
+      <h3 style="margin-bottom:12px">🔧 Service Call Fee</h3>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px">
+        Automatically add a service call fee line item to every new quote and invoice.
+      </p>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <input type="checkbox" id="set-auto-svc" ${App.state.autoServiceCall ? 'checked' : ''}>
+        <label for="set-auto-svc" style="margin:0;cursor:pointer">Auto-add service call fee to new quotes &amp; invoices</label>
+      </div>
+      <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
+        <div class="form-group" style="flex:1;min-width:200px;margin-bottom:0">
+          <label>Service Call Price ($)</label>
+          <input class="form-control" id="set-svc-price" type="number" min="0" step="0.01" value="${App.state.serviceCallPrice != null ? App.state.serviceCallPrice : 99}">
+        </div>
+        <button class="btn btn-primary" onclick="Settings.saveServiceCall()">Save</button>
+      </div>
+    </div>
+
     ${typeof CalendarIntegration !== 'undefined' ? CalendarIntegration.renderSettings() : ''}
 
     <div class="card" style="margin-bottom:16px">
@@ -79,6 +97,16 @@ const Settings = {
     App.state.formspreeEndpoint = endpoint;
     App.saveState();
     App.toast(endpoint ? 'Formspree endpoint saved' : 'Formspree endpoint cleared');
+    App.handleRoute();
+  },
+
+  saveServiceCall() {
+    const autoSvc = document.getElementById('set-auto-svc').checked;
+    const svcPrice = parseFloat(document.getElementById('set-svc-price').value) || 0;
+    App.state.autoServiceCall = autoSvc;
+    App.state.serviceCallPrice = svcPrice;
+    App.saveState();
+    App.toast(autoSvc ? `Service call fee enabled — $${svcPrice.toFixed(2)}` : 'Service call fee disabled');
     App.handleRoute();
   },
 
