@@ -27,9 +27,13 @@ const App = {
     // Hide splash screen after init
     const splash = document.getElementById('splash-screen');
     if (splash) {
-      setTimeout(() => splash.classList.add('splash-hidden'), 600);
-      setTimeout(() => splash.remove(), 1100);
+      setTimeout(() => splash.classList.add('splash-hidden'), 800);
+      setTimeout(() => splash.remove(), 1300);
     }
+    // Bottom nav
+    this.initBottomNav();
+    // Sidebar overlay
+    this.initSidebarOverlay();
   },
 
   // --- State Management (localStorage) ---
@@ -435,7 +439,6 @@ const App = {
       { id: 'employees', label: 'Employees', hint: 'Time clock & certifications' },
       { id: 'analytics', label: 'Analytics', hint: 'Charts, reports & forecasting' },
       { id: 'estimator', label: 'Plumbing Estimator', hint: 'Material takeoffs, fixture units, pipe sizing' },
-      { id: 'paxeer', label: 'Paxeer Swap', hint: 'DeFi operations on Paxeer Network' },
       { id: 'photo-report', label: 'Photo Reports', hint: 'Job site documentation & damage assessment' },
       { id: 'warrantyTracker', label: 'Warranty Tracker', hint: 'Labor & parts warranty tracking' },
       { id: 'serviceHistory', label: 'Service History', hint: 'Complete customer history timeline' },
@@ -554,14 +557,64 @@ const App = {
   bindMobileMenu() {
     const toggle = document.getElementById('menu-toggle');
     const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
     if (toggle) {
-      toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+      toggle.addEventListener('click', () => {
+        const isOpen = sidebar.classList.toggle('open');
+        if (overlay) overlay.classList.toggle('hidden', !isOpen);
+      });
     }
-    document.addEventListener('click', (e) => {
-      if (!sidebar.contains(e.target) && e.target !== toggle) {
+    // Close sidebar when clicking overlay
+    if (overlay) {
+      overlay.addEventListener('click', () => {
         sidebar.classList.remove('open');
-      }
+        overlay.classList.add('hidden');
+      });
+    }
+    // Close sidebar when clicking a nav link on mobile
+    sidebar.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        if (overlay) overlay.classList.add('hidden');
+      });
     });
+  },
+
+  // --- Bottom Navigation (mobile) ---
+  initBottomNav() {
+    const bottomNav = document.getElementById('bottom-nav');
+    if (!bottomNav) return;
+    bottomNav.querySelectorAll('.bottom-nav-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const page = btn.dataset.page;
+        if (page === 'more') {
+          // Open sidebar for full nav
+          const sidebar = document.getElementById('sidebar');
+          const overlay = document.getElementById('sidebar-overlay');
+          sidebar.classList.add('open');
+          if (overlay) overlay.classList.remove('hidden');
+        } else {
+          window.location.hash = page;
+        }
+      });
+    });
+    // Mobile search button
+    const searchBtn = document.getElementById('mobile-search-btn');
+    if (searchBtn) {
+      searchBtn.addEventListener('click', () => {
+        const overlay = document.getElementById('cmd-palette-overlay');
+        if (overlay) {
+          overlay.classList.remove('hidden');
+          const input = document.getElementById('cmd-palette-input');
+          if (input) { input.value = ''; setTimeout(() => input.focus(), 50); }
+        }
+      });
+    }
+  },
+
+  // --- Sidebar Overlay ---
+  initSidebarOverlay() {
+    // Already handled in bindMobileMenu
   },
 
   handleRoute() {
@@ -570,6 +623,23 @@ const App = {
     this.checkOverdue();
     document.querySelectorAll('.nav-link').forEach(link => {
       link.classList.toggle('active', link.dataset.page === hash);
+    });
+    // Update mobile header title
+    const pageTitles = {
+      dashboard: 'Dashboard', scheduler: 'Scheduler', eod: 'End of Day', mileage: 'Mileage',
+      quotes: 'Quotes', invoices: 'Invoices', tracker: 'Profit Tracker', customers: 'Customers',
+      followups: 'Follow-Ups', inventory: 'Inventory', maintenance: 'Maintenance', warranty: 'Warranty',
+      warrantyTracker: 'Warranties', serviceHistory: 'Service History', estimator: 'Estimator',
+      'photo-report': 'Photo Reports', 'price-book': 'Price Book', memberships: 'Memberships',
+      employees: 'Employees', contracts: 'Contracts', insurance: 'Insurance', email: 'Email Marketing',
+      reviews: 'Reviews', analytics: 'Analytics', rates: 'Rates', discounts: 'Discounts',
+      settings: 'Settings', export: 'Export', storage: 'Storage',
+    };
+    const mobileTitle = document.getElementById('mobile-page-title');
+    if (mobileTitle) mobileTitle.textContent = pageTitles[hash] || pageTitles[hash.split('/')[0]] || 'FlowJob';
+    // Update bottom nav active state
+    document.querySelectorAll('.bottom-nav-item').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.page === hash || (hash === 'dashboard' && btn.dataset.page === 'dashboard'));
     });
     const content = document.getElementById('content');
     // Support parameterized routes: try exact match first, then base route
@@ -582,6 +652,9 @@ const App = {
     } else {
       content.innerHTML = '<div class="empty-state"><div class="icon">🚧</div><h3>Page not found</h3></div>';
     }
+    // Scroll to top on page change
+    content.scrollTop = 0;
+    window.scrollTo(0, 0);
   },
 
   // --- Utilities ---
@@ -859,11 +932,6 @@ Pages['analytics'] = () => {
 Pages['estimator'] = () => {
   return `<div class="page-header"><h2>🔧 Plumbing Estimator</h2></div>
     ${PlumbingEstimator.renderEstimator()}`;
-};
-
-Pages['paxeer'] = () => {
-  return `<div class="page-header"><h2>🦊 Paxeer Swap</h2></div>
-    ${PaxeerSwap.renderDashboard()}`;
 };
 
 Pages['photo-report'] = () => {
