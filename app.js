@@ -702,7 +702,9 @@ const App = {
     container.appendChild(toast);
     setTimeout(() => {
       toast.classList.add('toast-exit');
-      toast.addEventListener('animationend', () => toast.remove());
+      // Fallback: force-remove after 400ms even if animation doesn't fire
+      const fallback = setTimeout(() => { if (toast.parentNode) toast.remove(); }, 400);
+      toast.addEventListener('animationend', () => { clearTimeout(fallback); toast.remove(); });
     }, 3000);
   },
 
@@ -715,10 +717,16 @@ const App = {
     overlay.onclick = (e) => {
       if (e.target === overlay) this.closeModal();
     };
+    // Hide bottom nav when modal is open (mobile)
+    const bn = document.getElementById('bottom-nav');
+    if (bn) bn.style.display = 'none';
   },
 
   closeModal() {
     document.getElementById('modal-overlay').classList.add('hidden');
+    // Restore bottom nav
+    const bn = document.getElementById('bottom-nav');
+    if (bn) bn.style.display = '';
   },
 
   // Close modal on Escape key
