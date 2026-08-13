@@ -1,0 +1,17 @@
+{
+  "name": "FlowJob — Plumbing Business Manager",
+  "short_name": "FlowJob",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1a2332",
+  "theme_color": "#D4AF37",
+  "description": "The complete business management app for plumbing companies — quotes, invoices, scheduling, memberships, insurance claims, employee management, analytics, and more",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
