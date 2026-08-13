@@ -47,7 +47,14 @@ const Invoices = {
   new() {
     const id = App.genId();
     const num = App.state.nextInvoiceNum++;
-    App.state.invoices.push({ id, number: num, date: App.today(), dueDate: '', customer:'', customerEmail:'', items:[], notes:'', status:'unpaid', subtotal:0, tax:0, total:0, taxExempt:false, payments:[] });
+    const items = [];
+    if (App.state.autoServiceCall) {
+      const price = parseFloat(App.state.serviceCallPrice) || 99;
+      items.push({ desc: 'Service Call', price });
+    }
+    App.state.invoices.push({ id, number: num, date: App.today(), dueDate: '', customer:'', customerEmail:'', items, notes:'', status:'unpaid', subtotal:0, tax:0, total:0, taxExempt:false, payments:[], depositAmount:0, depositPaid:0, depositPayments:[] });
+    const inv = App.state.invoices[App.state.invoices.length - 1];
+    if (items.length) this._recalc(inv);
     App.saveState(); this.edit(id);
   },
   edit(id) {
@@ -102,6 +109,23 @@ const Invoices = {
         ${inv.discountAmount ? `<div style="margin-top:4px;font-size:13px;color:var(--success)">Discount: -${App.formatCurrency(inv.discountAmount)}</div>` : ''}
       </div>
       <div class="form-group"><label>Notes</label><textarea class="form-control" id="if-notes">${App.esc(inv.notes||'')}</textarea></div>
+      <div class="form-group"><label>Deposit Amount</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-control" type="number" step="0.01" id="if-deposit" value="${inv.depositAmount||0}" style="max-width:150px">
+          <span style="font-size:13px;color:var(--text-muted)">Set to 0 for no deposit</span>
+        </div>
+      </div>
+      ${inv.depositAmount ? `<div class="form-group"><label>Record Deposit Payment</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-control" type="number" step="0.01" id="if-deposit-pay-amt" placeholder="Amount" style="max-width:150px">
+          <select class="form-control" id="if-deposit-pay-method" style="max-width:160px">
+            <option value="e-transfer">📧 E-Transfer</option><option value="cash">💵 Cash</option>
+            <option value="cheque">📝 Cheque</option><option value="card">💳 Credit Card</option>
+          </select>
+          <button class="btn btn-sm btn-primary" onclick="Invoices._recordDepositPayment('${inv.id}')">Record</button>
+        </div>
+        ${(inv.depositPayments||[]).length ? `<div style="margin-top:6px;font-size:12px;color:var(--text-muted)">Payments: ${(inv.depositPayments||[]).map(p=>`${App.formatCurrency(p.amount)} (${p.method}, ${p.date})`).join(', ')}</div>` : ''}
+      </div>` : ''}
       <div class="form-group"><label>Payment Method</label>
         <select class="form-control" id="if-payment-method">
           <option value="">— Select —</option>
@@ -130,6 +154,8 @@ const Invoices = {
   },
   _renderItems(inv) {
     if (!inv.items.length) return '<p style="color:var(--text-muted);font-size:13px">No items yet</p>';
+    const depositPaid = (inv.depositPayments||[]).reduce((s,p)=>s+p.amount,0);
+    const depositRemaining = (inv.depositAmount||0) - depositPaid;
     return `<table><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead><tbody>
       ${inv.items.map((it,i) => `<tr><td>${App.esc(it.desc)}</td><td>${App.formatCurrency(it.price)}</td>
         <td><button class="btn btn-sm btn-danger" onclick="Invoices._removeItem('${inv.id}',${i})">✕</button></td></tr>`).join('')}
@@ -139,6 +165,11 @@ const Invoices = {
       ${inv.discountAmount ? `<div style="color:var(--success)">Discount: -${App.formatCurrency(inv.discountAmount)}</div>` : ''}
       <div>${inv.taxExempt ? 'HST: Exempt' : 'HST (13%): ' + App.formatCurrency(inv.tax)}</div>
       <div style="font-size:18px;font-weight:700;color:var(--navy)">Total: ${App.formatCurrency(inv.total)}</div>
+      ${inv.depositAmount ? `<div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:6px;font-size:13px;text-align:left">
+        <strong>🏦 Deposit:</strong> ${App.formatCurrency(inv.depositAmount)}<br>
+        <span style="color:var(--success)">Paid: ${App.formatCurrency(depositPaid)}</span> ·
+        <span style="color:${depositRemaining>0?'var(--danger)':'var(--success)'}">Remaining: ${App.formatCurrency(depositRemaining)}</span>
+      </div>` : ''}
       ${inv.preferredPayment ? `<div style="margin-top:6px;font-size:12px;color:var(--text-muted)">Payment: ${inv.preferredPayment === 'e-transfer' ? '📧 E-Transfer' : inv.preferredPayment === 'cash' ? '💵 Cash' : inv.preferredPayment === 'cheque' ? '📝 Cheque' : '💳 Card'}</div>` : ''}
     </div>`;
   },
@@ -191,6 +222,7 @@ const Invoices = {
     inv.dueDate = document.getElementById('if-due').value;
     inv.notes = document.getElementById('if-notes')?.value || '';
     inv.preferredPayment = document.getElementById('if-payment-method')?.value || '';
+    inv.depositAmount = parseFloat(document.getElementById('if-deposit')?.value) || 0;
     inv.discountId = document.getElementById('if-discount')?.value || '';
     inv.quickDiscountValue = parseFloat(document.getElementById('if-disc-val')?.value) || 0;
     inv.quickDiscountType = document.getElementById('if-disc-type')?.value || 'percent';
@@ -200,6 +232,18 @@ const Invoices = {
   _refresh(iid) {
     const inv = App.state.invoices.find(x => x.id === iid);
     document.getElementById('if-items').innerHTML = this._renderItems(inv);
+  },
+  _recordDepositPayment(iid) {
+    const inv = App.state.invoices.find(x => x.id === iid);
+    const amt = parseFloat(document.getElementById('if-deposit-pay-amt')?.value) || 0;
+    const method = document.getElementById('if-deposit-pay-method')?.value || 'cash';
+    if (amt <= 0) return App.toast('Enter a deposit payment amount', 'error');
+    if (!inv.depositPayments) inv.depositPayments = [];
+    inv.depositPayments.push({ amount: amt, method, date: App.today() });
+    inv.depositPaid = inv.depositPayments.reduce((s, p) => s + p.amount, 0);
+    App.saveState();
+    App.toast('Deposit payment recorded: ' + App.formatCurrency(amt));
+    this.edit(iid); // Refresh form
   },
   _email(invId) {
     const inv = App.state.invoices.find(x => x.id === invId);
@@ -212,12 +256,46 @@ const Invoices = {
       (inv.discountAmount ? `\nDiscount: -${App.formatCurrency(inv.discountAmount)}` : '') +
       `\nHST: ${App.formatCurrency(inv.tax)}\nTotal: ${App.formatCurrency(inv.total)}` +
       `\n\nPayment due: ${inv.dueDate || 'Upon receipt'}` +
+      (biz.hstNumber ? `\nHST#: ${biz.hstNumber}` : '') +
       `\n\nPayment Methods:\n• E-Transfer: Send to ${et}` +
       `\n• Cash: Accepted on-site\n• Cheque: Payable to ${biz.name}` +
       `\n\nThanks,\n${biz.contact}\n${biz.name}`;
     window.open(`mailto:${inv.customerEmail}?subject=Invoice #${inv.number} — ${biz.name}&body=${encodeURIComponent(body)}`);
   },
   markPaid(id) {
+    const inv = App.state.invoices.find(x => x.id === id);
+    if (!inv) return;
+    const hasFollowUp = (App.state.followUps||[]).some(f => f.invoiceId === id && f.status === 'pending');
+    App.openModal(`
+      <div class="modal-header"><h3>✅ Before You Go — Invoice #${inv.number}</h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
+      <p style="margin-bottom:16px;font-size:14px;color:var(--text-muted)">Complete this checklist before marking as paid.</p>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px">
+          <input type="checkbox" id="ckg-payment" style="width:18px;height:18px"> Payment collected?
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px">
+          <input type="checkbox" id="ckg-followup" style="width:18px;height:18px" ${hasFollowUp?'checked':''}> Follow-up scheduled?
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px">
+          <input type="checkbox" id="ckg-signoff" style="width:18px;height:18px"> Customer sign-off obtained?
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15px">
+          <input type="checkbox" id="ckg-photos" style="width:18px;height:18px"> Job photos taken?
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="Invoices._checklistNext('${id}')">Next →</button>
+      </div>
+    `);
+  },
+  _checklistNext(id) {
+    const checks = ['ckg-payment','ckg-followup','ckg-signoff','ckg-photos'];
+    const unchecked = checks.filter(c => !document.getElementById(c)?.checked);
+    if (unchecked.length) return App.toast('Please complete all checklist items', 'error');
+    this._showPaidSignature(id);
+  },
+  _showPaidSignature(id) {
     const inv = App.state.invoices.find(x => x.id === id);
     if (!inv) return;
     App.openModal(`
@@ -339,6 +417,11 @@ const Invoices = {
         <div style="font-size:18px;font-weight:700;margin-top:4px">Total: ${App.formatCurrency(inv.total)}</div>
       </div>
       ${paymentInfo}
+      ${inv.depositAmount ? (() => { const dp = (inv.depositPayments||[]).reduce((s,p)=>s+p.amount,0); const dr = inv.depositAmount - dp; return `<div style="margin-top:12px;padding:10px;background:#fff8e1;border-radius:6px;font-size:13px">
+        <strong>🏦 Deposit:</strong> ${App.formatCurrency(inv.depositAmount)}<br>
+        <span style="color:var(--success)">Paid: ${App.formatCurrency(dp)}</span> ·
+        <span style="color:${dr>0?'var(--danger)':'var(--success)'}">Remaining: ${App.formatCurrency(dr)}</span>
+      </div>`; })() : ''}
       ${et ? `<div style="margin-top:16px;padding:12px;background:#f0f7ff;border-radius:6px;font-size:13px">
         <strong>📧 Payment Methods:</strong><br>
         • <strong>E-Transfer:</strong> Send to <strong>${App.esc(et)}</strong>${(App.state.businessInfo||{}).etransferAutoDeposit ? ' (Auto-Deposit)' : ''}<br>
