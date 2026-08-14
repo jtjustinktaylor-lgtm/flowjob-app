@@ -14,7 +14,7 @@ Pages.invoices = function() {
       <button class="btn btn-outline" onclick="App.exportCSV('annual')">📋 Annual Report CSV</button>
     </div>
     ${invs.length === 0
-      ? '<div class="card"><div class="empty-state"><div class="icon">💰</div><h3>No invoices yet</h3><p>Create an invoice or convert a quote</p></div></div>'
+      ? '<div class="card"><div class="empty-state"><div class="icon" id="empty-invoices"></div><h3>No invoices yet</h3><p>Create an invoice or convert a quote</p></div></div>'
       : `<div class="card"><div class="table-wrap"><table id="inv-table">
         <thead><tr><th>#</th><th>Customer</th><th>Date</th><th>Due</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>${invs.map(i => `<tr class="inv-row" data-customer="${App.esc((i.customer||'').toLowerCase())}" data-status="${i.status}" data-number="${i.number}">
