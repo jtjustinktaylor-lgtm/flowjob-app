@@ -7,8 +7,15 @@
   <meta name="theme-color" content="#0D1B2A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FlowJob">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="FlowJob">
+  <meta name="msapplication-TileColor" content="#0D1B2A">
+  <meta name="msapplication-TileImage" content="assets/icon-192.png">
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
-  <link rel="apple-touch-icon" href="assets/icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -21,16 +28,7 @@
   <!-- Splash Screen -->
   <div id="splash-screen">
     <div class="splash-logo">
-      <svg viewBox="0 0 80 80" width="80" height="80">
-        <circle cx="40" cy="40" r="36" fill="#0D1B2A" stroke="#C9A84C" stroke-width="2"/>
-        <path d="M40,12 C40,12 58,32 58,44 C58,53.9 49.9,62 40,62 C30.1,62 22,53.9 22,44 C22,32 40,12 40,12Z" fill="#C9A84C" opacity="0.9"/>
-        <g transform="translate(40,40)" fill="#0D1B2A" opacity="0.8">
-          <rect x="-2.5" y="-18" width="5" height="24" rx="2"/>
-          <rect x="-10" y="-18" width="20" height="5" rx="2"/>
-          <rect x="-10" y="-18" width="5" height="12" rx="2"/>
-          <rect x="5" y="-18" width="5" height="12" rx="2"/>
-        </g>
-      </svg>
+      <img src="assets/icon.svg" alt="FlowJob Logo" width="100" height="100">
     </div>
     <h1 class="splash-title">FlowJob</h1>
     <p class="splash-subtitle">Plumbing Business Manager</p>
@@ -43,18 +41,7 @@
     <!-- Sidebar Navigation -->
     <nav id="sidebar">
       <div class="brand">
-        <div class="logo-icon">
-          <svg viewBox="0 0 80 80" width="28" height="28">
-            <circle cx="40" cy="40" r="36" fill="transparent"/>
-            <path d="M40,14 C40,14 58,33 58,44 C58,53.5 49.9,61 40,61 C30.1,61 22,53.5 22,44 C22,33 40,14 40,14Z" fill="#C9A84C"/>
-            <g transform="translate(40,40)" fill="#0D1B2A" opacity="0.8">
-              <rect x="-2.5" y="-17" width="5" height="22" rx="2"/>
-              <rect x="-9" y="-17" width="18" height="5" rx="2"/>
-              <rect x="-9" y="-17" width="5" height="11" rx="2"/>
-              <rect x="4" y="-17" width="5" height="11" rx="2"/>
-            </g>
-          </svg>
-        </div>
+        <div class="logo-icon"><img src="assets/icon.svg" alt="FlowJob Logo" width="28" height="28"></div>
         <div class="brand-text">
           <h1>FlowJob</h1>
           <span>Plumbing Manager</span>
