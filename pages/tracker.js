@@ -183,7 +183,7 @@ const Tracker = {
         <tr style="font-weight:700;border-top:2px solid #1B3A5C"><td>Total</td><td>${App.formatCurrency(yearRev)}</td><td>${App.formatCurrency(yearExp)}</td><td style="color:${(yearRev-yearExp)>=0?'#16a34a':'#dc2626'}">${App.formatCurrency(yearRev-yearExp)}</td></tr></tbody></table>
       ${topCusts.length > 0 ? `<h3 style="margin-top:24px">Top Customers</h3><ol>${topCusts.map(([name,amt])=>`<li>${name} — ${App.formatCurrency(amt)}</li>`).join('')}</ol>` : ''}
       ${Object.keys(catTotals).length > 0 ? `<h3 style="margin-top:24px">Expenses by Category</h3><table><thead><tr><th>Category</th><th>Total</th></tr></thead><tbody>${Object.entries(catTotals).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>`<tr><td>${cat}</td><td>${App.formatCurrency(amt)}</td></tr>`).join('')}</tbody></table>` : ''}
-      <div style="margin-top:32px;font-size:11px;color:#999;text-align:center">Generated ${new Date().toLocaleDateString('en-CA')} — FlowJob Business Manager</div>
+      <div style="margin-top:32px;font-size:11px;color:#999;text-align:center">Generated ${new Date().toLocaleDateString('en-CA')} — ${App.getBusinessInfo().name} Business Manager</div>
     `, year + ' Year-End Summary');
   }
 };
