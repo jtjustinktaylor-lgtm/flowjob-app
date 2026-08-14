@@ -1,6 +1,6 @@
 # 💧 FlowJob — Plumbing Business Manager
 
-A complete business management PWA for plumbing professionals.
+A free, offline-first business management PWA for plumbing professionals.
 
 **Features:**
 - 📊 Dashboard with business overview
@@ -19,7 +19,11 @@ A complete business management PWA for plumbing professionals.
 - 📸 Insurance claim documentation
 - 👷 Employee management
 - 📊 Analytics & reporting
+- 🚗 Mileage tracking
+- 📦 Inventory management
 
-**Live:** [flowjob-app.vercel.app](https://flowjob-app.vercel.app)
+**Live:** [jtjustinktaylor-lgtm.github.io/flowjob-app](https://jtjustinktaylor-lgtm.github.io/flowjob-app/)
 
-Built with vanilla JS — no build step, no dependencies.
+**Landing page:** [jtjustinktaylor-lgtm.github.io/flowjob-app/landing.html](https://jtjustinktaylor-lgtm.github.io/flowjob-app/landing.html)
+
+Built with vanilla JS — no build step, no dependencies, no signup required. Each plumber gets their own private workspace.

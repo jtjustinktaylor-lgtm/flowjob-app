@@ -217,10 +217,10 @@ const App = {
   getBusinessInfo() {
     return this.state.businessInfo || {
       name: 'Your Plumbing Business',
-      contact: 'Justin Taylor',
-      phone: '(519) 350-8772',
-      email: 'jtjustinktaylor-lgtm@protonmail.com',
-      address: 'Chatham-Kent, Ontario',
+      contact: 'Your Name',
+      phone: '(555) 123-4567',
+      email: 'your@email.com',
+      address: 'Your City, State/Province',
       hstNumber: '',
     };
   },

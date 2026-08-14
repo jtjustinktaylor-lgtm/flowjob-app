@@ -1,0 +1,20 @@
+# Deploy tools (contain personal API tokens)
+deploy-tools/
+deploy-v6.html
+push-flowjob.html
+push-to-github.sh
+flowjob-deployer.html
+
+# Backup files
+*.backup
+index.html.backup
+
+# Stale data files
+files.json
+
+# Vercel (deployed to GitHub Pages, not Vercel)
+vercel.json
+
+# OS
+.DS_Store
+Thumbs.db
