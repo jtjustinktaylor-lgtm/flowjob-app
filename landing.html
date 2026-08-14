@@ -44,13 +44,50 @@
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 4px 20px rgba(201,168,76,0.3); }
+      50% { box-shadow: 0 4px 30px rgba(201,168,76,0.5); }
+    }
+
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     /* Hero */
     .hero {
       background: linear-gradient(160deg, #0D1B2A 0%, #1A2F4A 60%, #264570 100%);
       color: white;
-      padding: 80px 24px 60px;
+      padding: 100px 24px 80px;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -62,103 +99,182 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle at 30% 50%, rgba(201,168,76,0.08) 0%, transparent 50%),
-                  radial-gradient(circle at 70% 80%, rgba(201,168,76,0.05) 0%, transparent 40%);
+      background: radial-gradient(circle at 30% 50%, rgba(201,168,76,0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(201,168,76,0.06) 0%, transparent 40%);
       pointer-events: none;
+      animation: float 8s ease-in-out infinite;
     }
-    .hero-content { position: relative; max-width: 700px; margin: 0 auto; }
-    .hero-logo { width: 80px; height: 80px; margin: 0 auto 20px; }
-    .hero-logo img { width: 100%; height: 100%; }
+    .hero-content { 
+      position: relative; 
+      max-width: 700px; 
+      margin: 0 auto;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    .hero-logo { 
+      width: 120px; 
+      height: 120px; 
+      margin: 0 auto 24px;
+      animation: scaleIn 0.6s ease-out 0.2s both;
+    }
+    .hero-logo img { 
+      width: 100%; 
+      height: 100%; 
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(201,168,76,0.4), 0 0 60px rgba(201,168,76,0.2);
+      border: 3px solid rgba(255,255,255,0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hero-logo img:hover {
+      transform: scale(1.05) rotate(-2deg);
+      box-shadow: 0 12px 40px rgba(201,168,76,0.5), 0 0 80px rgba(201,168,76,0.3);
+    }
     .hero h1 {
-      font-size: 42px;
+      font-size: 52px;
       font-weight: 800;
       letter-spacing: -0.03em;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+      animation: fadeInUp 0.8s ease-out 0.3s both;
     }
-    .hero h1 span { color: var(--gold); }
+    .hero h1 span { 
+      color: var(--gold);
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
     .hero .tagline {
-      font-size: 18px;
-      color: rgba(255,255,255,0.7);
-      margin-bottom: 32px;
+      font-size: 20px;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 40px;
       font-weight: 400;
+      animation: fadeInUp 0.8s ease-out 0.4s both;
     }
     .hero-cta {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      background: var(--gold);
+      gap: 12px;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
       color: var(--navy-dark);
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 700;
-      padding: 16px 36px;
-      border-radius: 14px;
+      padding: 18px 40px;
+      border-radius: 16px;
       text-decoration: none;
-      transition: all 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+      animation: fadeInUp 0.8s ease-out 0.5s both, pulse 3s ease-in-out 1.5s infinite;
+      position: relative;
+      overflow: hidden;
     }
-    .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.4); }
-    .hero-sub { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.5); }
+    .hero-cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
+    }
+    .hero-cta:hover::before {
+      left: 100%;
+    }
+    .hero-cta:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 8px 30px rgba(201,168,76,0.5);
+    }
+    .hero-sub { 
+      margin-top: 20px; 
+      font-size: 14px; 
+      color: rgba(255,255,255,0.6);
+      animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
 
     /* Social proof */
     .social-proof {
       background: white;
       border-bottom: 1px solid #E2E5EC;
-      padding: 20px 24px;
+      padding: 24px 24px;
       text-align: center;
-      font-size: 14px;
+      font-size: 15px;
       color: var(--text-muted);
+      animation: fadeIn 0.6s ease-out 0.8s both;
     }
-    .social-proof strong { color: var(--text); }
+    .social-proof strong { 
+      color: var(--text);
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
     /* Features */
     .features {
       max-width: 1000px;
       margin: 0 auto;
-      padding: 60px 24px;
+      padding: 80px 24px;
     }
     .features-title {
       text-align: center;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 800;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
       letter-spacing: -0.02em;
     }
     .features-sub {
       text-align: center;
       color: var(--text-muted);
-      margin-bottom: 40px;
-      font-size: 15px;
+      margin-bottom: 48px;
+      font-size: 16px;
     }
     .feature-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
+      gap: 24px;
     }
     .feature-card {
       background: white;
-      border-radius: 16px;
-      padding: 28px 24px;
+      border-radius: 20px;
+      padding: 32px 28px;
       border: 1px solid #E2E5EC;
-      transition: all 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
     .feature-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
       border-color: var(--gold);
     }
+    .feature-card:hover::before {
+      opacity: 1;
+    }
     .feature-icon {
-      font-size: 32px;
-      margin-bottom: 12px;
+      font-size: 36px;
+      margin-bottom: 16px;
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
     }
     .feature-card h3 {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .feature-card p {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text-muted);
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     /* How it works */
@@ -166,94 +282,158 @@
       background: white;
       border-top: 1px solid #E2E5EC;
       border-bottom: 1px solid #E2E5EC;
-      padding: 60px 24px;
+      padding: 80px 24px;
     }
     .how-it-works .inner { max-width: 700px; margin: 0 auto; text-align: center; }
     .how-it-works h2 {
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 800;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
-    .how-it-works .sub { color: var(--text-muted); margin-bottom: 40px; font-size: 15px; }
-    .steps { display: grid; gap: 28px; text-align: left; }
+    .how-it-works .sub { color: var(--text-muted); margin-bottom: 48px; font-size: 16px; }
+    .steps { display: grid; gap: 32px; text-align: left; }
     .step {
       display: flex;
-      gap: 16px;
+      gap: 20px;
       align-items: start;
+      padding: 24px;
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+    .step:hover {
+      background: linear-gradient(135deg, rgba(201,168,76,0.05), transparent);
+      transform: translateX(8px);
     }
     .step-num {
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: var(--gold);
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
       color: var(--navy-dark);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 18px;
+      font-size: 20px;
       flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(201,168,76,0.3);
     }
-    .step h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-    .step p { font-size: 13px; color: var(--text-muted); }
+    .step h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .step p { font-size: 14px; color: var(--text-muted); }
 
     /* Privacy */
     .privacy {
       max-width: 700px;
       margin: 0 auto;
-      padding: 60px 24px;
+      padding: 80px 24px;
       text-align: center;
     }
-    .privacy h2 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
-    .privacy p { color: var(--text-muted); font-size: 15px; margin-bottom: 12px; }
+    .privacy h2 { font-size: 32px; font-weight: 800; margin-bottom: 16px; }
+    .privacy p { color: var(--text-muted); font-size: 16px; margin-bottom: 16px; }
     .privacy-badges {
       display: flex;
-      gap: 16px;
+      gap: 20px;
       justify-content: center;
       flex-wrap: wrap;
-      margin-top: 24px;
+      margin-top: 32px;
     }
     .privacy-badge {
       background: white;
       border: 1px solid #E2E5EC;
-      border-radius: 12px;
-      padding: 16px 20px;
+      border-radius: 16px;
+      padding: 20px 24px;
       text-align: center;
-      min-width: 140px;
+      min-width: 150px;
+      transition: all 0.3s ease;
     }
-    .privacy-badge .icon { font-size: 28px; margin-bottom: 6px; }
-    .privacy-badge .label { font-size: 13px; font-weight: 600; }
-    .privacy-badge .desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .privacy-badge:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      border-color: var(--gold);
+    }
+    .privacy-badge .icon { 
+      font-size: 32px; 
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+    .privacy-badge .label { font-size: 14px; font-weight: 600; }
+    .privacy-badge .desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
     /* CTA */
     .cta-section {
       background: linear-gradient(160deg, #0D1B2A 0%, #1A2F4A 100%);
       color: white;
       text-align: center;
-      padding: 60px 24px;
+      padding: 80px 24px;
+      position: relative;
+      overflow: hidden;
     }
-    .cta-section h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
-    .cta-section p { color: rgba(255,255,255,0.6); margin-bottom: 28px; font-size: 15px; }
-    .cta-section .hero-cta { font-size: 16px; }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 50% 50%, rgba(201,168,76,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .cta-section h2 { 
+      font-size: 32px; 
+      font-weight: 800; 
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .cta-section p { 
+      color: rgba(255,255,255,0.7); 
+      margin-bottom: 32px; 
+      font-size: 16px;
+      position: relative;
+    }
+    .cta-section .hero-cta { 
+      font-size: 17px;
+      position: relative;
+    }
 
     /* Footer */
     footer {
       background: #050E18;
-      color: rgba(255,255,255,0.4);
+      color: rgba(255,255,255,0.5);
       text-align: center;
-      padding: 24px;
-      font-size: 12px;
+      padding: 28px;
+      font-size: 13px;
     }
-    footer a { color: var(--gold); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+    footer a { color: var(--gold); text-decoration: none; transition: color 0.2s; }
+    footer a:hover { color: var(--gold-light); text-decoration: underline; }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+      40% { transform: translateX(-50%) translateY(-10px); }
+      60% { transform: translateX(-50%) translateY(-5px); }
+    }
+    .scroll-indicator svg {
+      width: 24px;
+      height: 24px;
+      stroke: rgba(255,255,255,0.4);
+    }
 
     @media (max-width: 600px) {
-      .hero { padding: 60px 20px 40px; }
-      .hero h1 { font-size: 30px; }
-      .hero .tagline { font-size: 15px; }
-      .hero-cta { font-size: 15px; padding: 14px 28px; }
-      .features-title, .how-it-works h2, .privacy h2, .cta-section h2 { font-size: 22px; }
+      .hero { padding: 80px 20px 60px; }
+      .hero h1 { font-size: 36px; }
+      .hero .tagline { font-size: 16px; }
+      .hero-cta { font-size: 16px; padding: 16px 32px; }
+      .features-title, .how-it-works h2, .privacy h2, .cta-section h2 { font-size: 24px; }
       .feature-grid { grid-template-columns: 1fr; }
+      .feature-card { padding: 24px 20px; }
+      .privacy-badge { min-width: 130px; padding: 16px; }
     }
   </style>
 </head>
@@ -263,12 +443,17 @@
   <section class="hero">
     <div class="hero-content">
       <div class="hero-logo">
-        <img src="assets/flowjob-logo.jpg" alt="FlowJob" style="width: 120px; height: 120px; border-radius: 24px; box-shadow: 0 8px 32px rgba(201,168,76,0.4); border: 3px solid rgba(255,255,255,0.2);">
+        <img src="assets/flowjob-logo.jpg" alt="FlowJob">
       </div>
       <h1><span>Flow</span>Job</h1>
       <p class="tagline">The free plumbing business manager that works offline — on your phone, tablet, or laptop.</p>
       <a href="index.html" class="hero-cta">🔧 Open FlowJob — It's Free</a>
       <p class="hero-sub">No signup · No download · Works offline · Your data stays on your device</p>
+    </div>
+    <div class="scroll-indicator">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14M19 12l-7 7-7-7"/>
+      </svg>
     </div>
   </section>
 
@@ -279,51 +464,51 @@
 
   <!-- Features -->
   <section class="features">
-    <h2 class="features-title">Everything you need to run your plumbing business</h2>
-    <p class="features-sub">From quote to payment — all in one app that works even in a basement with no signal.</p>
+    <h2 class="features-title animate-on-scroll">Everything you need to run your plumbing business</h2>
+    <p class="features-sub animate-on-scroll">From quote to payment — all in one app that works even in a basement with no signal.</p>
 
     <div class="feature-grid">
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll">
         <div class="feature-icon">📋</div>
         <h3>Professional Quotes</h3>
         <p>Build detailed quotes with material pricing, labor rates, flat-rate menu, and markup. Convert to invoice in one tap.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll">
         <div class="feature-icon">💰</div>
         <h3>Invoicing & Payments</h3>
         <p>Generate invoices, track payment status, send reminders. Supports e-transfer, cash, cheque, and card.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll">
         <div class="feature-icon">📅</div>
         <h3>Job Scheduling</h3>
         <p>Schedule jobs with time, address, and notes. See your day at a glance. Never miss an appointment.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll">
         <div class="feature-icon">📊</div>
         <h3>Profit Tracker</h3>
         <p>Track revenue vs expenses by month. Know your actual profit — not just what's in your bank account.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll">
         <div class="feature-icon">👤</div>
         <h3>Customer Management</h3>
         <p>Keep customer records, job history, and notes. Search and filter. Never forget a repeat customer's details.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll">
         <div class="feature-icon">🔧</div>
         <h3>Maintenance Plans</h3>
         <p>Sell recurring maintenance memberships. Track visits, automate follow-ups, and build recurring revenue.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll">
         <div class="feature-icon">📸</div>
         <h3>Photo Reports</h3>
         <p>Document job sites with before/after photos. Generate professional PDF reports for insurance claims.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll">
         <div class="feature-icon">🚗</div>
         <h3>Mileage Tracking</h3>
         <p>Log business trips with start/end odometer. Export for tax deductions. One less receipt to lose.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card animate-on-scroll">
         <div class="feature-icon">📦</div>
         <h3>Inventory</h3>
         <p>Track materials and parts. Know what's on the truck. Set reorder alerts so you never run out mid-job.</p>
@@ -334,24 +519,24 @@
   <!-- How It Works -->
   <section class="how-it-works">
     <div class="inner">
-      <h2>How it works</h2>
-      <p class="sub">Three steps. No account. No credit card. No catch.</p>
+      <h2 class="animate-on-scroll">How it works</h2>
+      <p class="sub animate-on-scroll">Three steps. No account. No credit card. No catch.</p>
       <div class="steps">
-        <div class="step">
+        <div class="step animate-on-scroll">
           <div class="step-num">1</div>
           <div>
             <h3>Open the app</h3>
             <p>Tap the link on your phone. That's it — the app loads instantly and installs itself as a home screen icon.</p>
           </div>
         </div>
-        <div class="step">
+        <div class="step animate-on-scroll">
           <div class="step-num">2</div>
           <div>
             <h3>Enter your business info</h3>
             <p>Your name, phone, address. This appears on your quotes and invoices. Takes 30 seconds.</p>
           </div>
         </div>
-        <div class="step">
+        <div class="step animate-on-scroll">
           <div class="step-num">3</div>
           <div>
             <h3>Start creating quotes</h3>
@@ -364,26 +549,26 @@
 
   <!-- Privacy -->
   <section class="privacy">
-    <h2>Your data is yours. Period.</h2>
-    <p>FlowJob stores everything on your device. No server, no cloud, no account. We can't see your data — and neither can anyone else.</p>
+    <h2 class="animate-on-scroll">Your data is yours. Period.</h2>
+    <p class="animate-on-scroll">FlowJob stores everything on your device. No server, no cloud, no account. We can't see your data — and neither can anyone else.</p>
 
     <div class="privacy-badges">
-      <div class="privacy-badge">
+      <div class="privacy-badge animate-on-scroll">
         <div class="icon">🔒</div>
         <div class="label">100% Local</div>
         <div class="desc">Data stays on your device</div>
       </div>
-      <div class="privacy-badge">
+      <div class="privacy-badge animate-on-scroll">
         <div class="icon">🚫</div>
         <div class="label">No Tracking</div>
         <div class="desc">Zero analytics or cookies</div>
       </div>
-      <div class="privacy-badge">
+      <div class="privacy-badge animate-on-scroll">
         <div class="icon">📴</div>
         <div class="label">Works Offline</div>
         <div class="desc">No internet required</div>
       </div>
-      <div class="privacy-badge">
+      <div class="privacy-badge animate-on-scroll">
         <div class="icon">💾</div>
         <div class="label">Easy Backup</div>
         <div class="desc">Export anytime as JSON</div>
@@ -393,15 +578,57 @@
 
   <!-- CTA -->
   <section class="cta-section">
-    <h2>Ready to ditch the spreadsheets?</h2>
-    <p>Join plumbers who've already made the switch to FlowJob.</p>
-    <a href="index.html" class="hero-cta">🔧 Open FlowJob — It's Free</a>
+    <h2 class="animate-on-scroll">Ready to ditch the spreadsheets?</h2>
+    <p class="animate-on-scroll">Join plumbers who've already made the switch to FlowJob.</p>
+    <a href="index.html" class="hero-cta animate-on-scroll">🔧 Open FlowJob — It's Free</a>
   </section>
 
   <!-- Footer -->
   <footer>
     <p>FlowJob — Plumbing Business Manager &nbsp;·&nbsp; <a href="https://github.com/jtjustinktaylor-lgtm/flowjob-app">GitHub</a> &nbsp;·&nbsp; Free & Open Source &nbsp;·&nbsp; Built with 🔧 by a plumber</p>
   </footer>
+
+  <!-- Scroll Animation Script -->
+  <script>
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          // Add stagger delay based on element index
+          const delay = entry.target.dataset.delay || 0;
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, delay);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe all animate-on-scroll elements
+    document.querySelectorAll('.animate-on-scroll').forEach((el, index) => {
+      el.dataset.delay = index * 100;
+      observer.observe(el);
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  </script>
 
 </body>
 </html>
