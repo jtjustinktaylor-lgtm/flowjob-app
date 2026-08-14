@@ -312,7 +312,7 @@ const App = {
     const biz = this.getBusinessInfo();
     const subject = encodeURIComponent('FlowJob Feedback — ' + (biz.contact || 'User'));
     const body = encodeURIComponent(msg + '\n\n---\nUser: ' + (biz.contact || 'Unknown') + '\nBusiness: ' + (biz.name || 'N/A') + '\nDate: ' + new Date().toISOString());
-    window.open('mailto:jtjustinktaylor-lgtm@protonmail.com?subject=' + subject + '&body=' + body, '_self');
+    window.open('mailto:flowjob.feedback@protonmail.com?subject=' + subject + '&body=' + body, '_self');
     textarea.value = '';
     this.toast('📧 Opening email client...');
   },
