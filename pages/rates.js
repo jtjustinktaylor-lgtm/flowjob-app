@@ -31,7 +31,14 @@ Pages.rates = function() {
       <button class="btn btn-primary" onclick="Rates.saveMarkup()">Save Markup</button>
     </div>
     <div class="card">
-      <div class="card-header"><h3>Flat Rate Book</h3></div>
+      <div class="card-header">
+        <h3>Flat Rate Book</h3>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-outline btn-sm" onclick="Rates.bulkEdit()">📝 Bulk Edit</button>
+          <button class="btn btn-outline btn-sm" onclick="Rates.importRates()">📥 Import</button>
+          <button class="btn btn-outline btn-sm" onclick="Rates.exportRates()">📤 Export</button>
+        </div>
+      </div>
       <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
         <input class="form-control" id="rates-search" placeholder="Search all flat rates..." style="max-width:300px" oninput="Rates._search()">
         <select class="form-control" id="rates-cat-filter" style="max-width:200px" onchange="Rates._search()">
@@ -81,18 +88,49 @@ const Rates = {
     App.openModal(`<div class="modal-header"><h3>Edit Rate</h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
       <div class="form-group"><label>Description</label><input class="form-control" id="ri-desc" value="${item.desc}"></div>
       <div class="form-group"><label>Price ($)</label><input class="form-control" type="number" step="0.01" id="ri-price" value="${item.price}"></div>
+      <div class="form-group">
+        <label>Category</label>
+        <select class="form-control" id="ri-cat">
+          ${Object.entries(FLAT_RATES).map(([k,v]) => `<option value="${k}" ${k === catKey ? 'selected' : ''}>${v.label}</option>`).join('')}
+        </select>
+      </div>
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="Rates._deleteItem('${catKey}','${itemId}')">Delete</button>
         <button class="btn btn-primary" onclick="Rates._saveItem('${catKey}','${itemId}')">Save</button>
       </div>`);
   },
   _saveItem(catKey, itemId) {
     const item = FLAT_RATES[catKey].items.find(i => i.id === itemId);
-    item.desc = document.getElementById('ri-desc').value;
-    item.price = parseFloat(document.getElementById('ri-price').value)||0;
+    const newDesc = document.getElementById('ri-desc').value;
+    const newPrice = parseFloat(document.getElementById('ri-price').value)||0;
+    const newCat = document.getElementById('ri-cat').value;
+    
+    // If category changed, move item
+    if (newCat !== catKey) {
+      const idx = FLAT_RATES[catKey].items.findIndex(i => i.id === itemId);
+      if (idx >= 0) {
+        FLAT_RATES[catKey].items.splice(idx, 1);
+        FLAT_RATES[newCat].items.push({ id: itemId, desc: newDesc, price: newPrice });
+      }
+    } else {
+      item.desc = newDesc;
+      item.price = newPrice;
+    }
+    
     App.state.flatRates = JSON.parse(JSON.stringify(FLAT_RATES));
     App.saveState();
     App.closeModal(); App.handleRoute(); App.toast('Rate updated');
+  },
+  _deleteItem(catKey, itemId) {
+    if (!confirm('Delete this rate?')) return;
+    const idx = FLAT_RATES[catKey].items.findIndex(i => i.id === itemId);
+    if (idx >= 0) {
+      FLAT_RATES[catKey].items.splice(idx, 1);
+      App.state.flatRates = JSON.parse(JSON.stringify(FLAT_RATES));
+      App.saveState();
+      App.closeModal(); App.handleRoute(); App.toast('Rate deleted');
+    }
   },
   addItem() {
     const cats = Object.entries(FLAT_RATES);
@@ -112,7 +150,125 @@ const Rates = {
     const price = parseFloat(document.getElementById('ri-price').value)||0;
     if (!desc) return App.toast('Enter a description','error');
     FLAT_RATES[catKey].items.push({ id: App.genId(), desc, price });
+    App.state.flatRates = JSON.parse(JSON.stringify(FLAT_RATES));
+    App.saveState();
     App.closeModal(); App.handleRoute(); App.toast('Service added');
+  },
+
+  // Bulk Edit Mode
+  bulkEdit() {
+    const cats = Object.entries(FLAT_RATES);
+    let html = `<div class="modal-header"><h3>Bulk Edit Rates</h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px">Edit prices directly in the table. Click "Apply" when done.</p>`;
+    
+    cats.forEach(([key, cat]) => {
+      html += `<h4 style="margin:16px 0 8px;color:var(--navy)">${cat.label}</h4>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Service</th><th style="width:120px">Price ($)</th></tr></thead>
+          <tbody>${cat.items.map(it => `
+            <tr>
+              <td>${it.desc}</td>
+              <td><input class="form-control" type="number" step="0.01" 
+                    id="bulk-${it.id}" value="${it.price}" 
+                    style="padding:4px 8px;font-size:14px"></td>
+            </tr>`).join('')}
+          </tbody>
+        </table></div>`;
+    });
+    
+    html += `<div class="modal-footer">
+      <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Rates._applyBulkEdit()">Apply All Changes</button>
+    </div>`;
+    
+    App.openModal(html);
+  },
+  _applyBulkEdit() {
+    let changed = 0;
+    Object.entries(FLAT_RATES).forEach(([catKey, cat]) => {
+      cat.items.forEach(item => {
+        const el = document.getElementById('bulk-' + item.id);
+        if (el) {
+          const newPrice = parseFloat(el.value);
+          if (!isNaN(newPrice) && newPrice !== item.price) {
+            item.price = newPrice;
+            changed++;
+          }
+        }
+      });
+    });
+    
+    if (changed > 0) {
+      App.state.flatRates = JSON.parse(JSON.stringify(FLAT_RATES));
+      App.saveState();
+      App.closeModal(); App.handleRoute();
+      App.toast(`Updated ${changed} rate${changed !== 1 ? 's' : ''}`);
+    } else {
+      App.toast('No changes made', 'info');
+    }
+  },
+
+  // Import/Export
+  exportRates() {
+    const data = {
+      hourlyRates: HOURLY_RATES,
+      materialMarkup: MATERIAL_MARKUP,
+      flatRates: FLAT_RATES,
+      exportDate: new Date().toISOString(),
+      version: '1.0'
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `flowjob-rates-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    App.toast('Rates exported');
+  },
+  importRates() {
+    App.openModal(`<div class="modal-header"><h3>Import Rates</h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px">Import rates from a JSON file. This will replace all current rates.</p>
+      <div class="form-group">
+        <label>Select File</label>
+        <input class="form-control" type="file" id="import-file" accept=".json">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="App.closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="Rates._processImport()">Import</button>
+      </div>`);
+  },
+  _processImport() {
+    const fileInput = document.getElementById('import-file');
+    if (!fileInput.files.length) return App.toast('Select a file', 'error');
+    
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        
+        if (data.hourlyRates) Object.assign(HOURLY_RATES, data.hourlyRates);
+        if (data.materialMarkup) Object.assign(MATERIAL_MARKUP, data.materialMarkup);
+        if (data.flatRates) {
+          Object.keys(data.flatRates).forEach(key => {
+            if (FLAT_RATES[key]) FLAT_RATES[key] = data.flatRates[key];
+          });
+        }
+        
+        App.state.hourlyRates = { ...HOURLY_RATES };
+        App.state.materialMarkup = JSON.parse(JSON.stringify(MATERIAL_MARKUP));
+        App.state.flatRates = JSON.parse(JSON.stringify(FLAT_RATES));
+        App.saveState();
+        
+        App.closeModal(); App.handleRoute();
+        App.toast('Rates imported successfully');
+      } catch (err) {
+        App.toast('Invalid file format', 'error');
+      }
+    };
+    reader.readAsText(file);
   },
 
   _search() {
