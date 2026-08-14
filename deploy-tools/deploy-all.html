@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowJob — Full Deploy</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0D1B2A;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container { max-width: 560px; width: 100%; padding: 32px; }
+    .logo { text-align: center; margin-bottom: 32px; }
+    .logo h1 { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #E0C872, #C9A84C, #A68A2E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .logo p { color: rgba(255,255,255,0.4); font-size: 13px; margin-top: 4px; }
+    .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+    .card h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #C9A84C; }
+    label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: rgba(255,255,255,0.6); }
+    input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: #e2e8f0; font-size: 14px; font-family: monospace; margin-bottom: 12px; }
+    input:focus { outline: none; border-color: #C9A84C; }
+    button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 8px; }
+    .btn-primary { background: linear-gradient(135deg, #C9A84C, #A68A2E); color: #0D1B2A; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(201,168,76,0.3); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); font-size: 13px; padding: 10px; }
+    .btn-outline:hover { border-color: #C9A84C; color: #C9A84C; }
+    #log { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px; font-size: 12px; font-family: monospace; max-height: 400px; overflow-y: auto; line-height: 1.6; margin-top: 12px; }
+    .ok { color: #4ade80; } .err { color: #f87171; } .info { color: #60a5fa; } .warn { color: #fbbf24; }
+    .file-tree { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.7; margin-bottom: 16px; max-height: 200px; overflow-y: auto; }
+    .file-tree .dir { color: #C9A84C; font-weight: 600; }
+    .file-tree .count { color: #4ade80; font-weight: 600; }
+    .progress { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; margin: 12px 0; overflow: hidden; display: none; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #A68A2E, #C9A84C, #E0C872); border-radius: 2px; width: 0%; transition: width 0.3s; }
+    .stats { display: flex; gap: 12px; margin-bottom: 12px; }
+    .stat { flex: 1; text-align: center; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.04); }
+    .stat .num { font-size: 20px; font-weight: 700; color: #C9A84C; }
+    .stat .lbl { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1>🔧 FlowJob Full Deploy</h1>
+      <p>Every file → GitHub → Pages</p>
+    </div>
+
+    <div class="card">
+      <h3>🔑 GitHub</h3>
+      <label>Personal Access Token (repo scope)</label>
+      <input type="password" id="token" placeholder="ghp_..." />
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn-outline" onclick="saveToken()">💾 Save</button>
+        <button class="btn-outline" onclick="loadToken()">📂 Load</button>
+      </div>
+      <label>Repository</label>
+      <input type="text" id="repo" value="jtjustinktaylor-lgtm/flowjob-app" />
+    </div>
+
+    <div class="card">
+      <h3>📂 Workspace</h3>
+      <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:12px">
+        Select your FlowJob root folder. All app files will be read automatically.
+      </p>
+      <button class="btn-outline" onclick="pickFolder()" id="pick-btn">📁 Choose FlowJob Folder</button>
+      <div id="folder-status" style="font-size:12px;margin-top:8px;color:rgba(255,255,255,0.4)">No folder selected</div>
+    </div>
+
+    <div class="card" id="preview-card" style="display:none">
+      <h3>📋 Files Found</h3>
+      <div class="stats">
+        <div class="stat"><div class="num" id="stat-count">0</div><div class="lbl">files</div></div>
+        <div class="stat"><div class="num" id="stat-size">0</div><div class="lbl">KB total</div></div>
+        <div class="stat"><div class="num" id="stat-dirs">0</div><div class="lbl">directories</div></div>
+      </div>
+      <div class="file-tree" id="file-tree"></div>
+      <div class="progress" id="progress"><div class="progress-bar" id="progress-bar"></div></div>
+      <button class="btn-primary" id="deploy-btn" onclick="deploy()" disabled>🚀 Deploy Everything</button>
+    </div>
+
+    <div class="card">
+      <h3>📋 Log</h3>
+      <div id="log"></div>
+    </div>
+  </div>
+
+  <script>
+    // ── All files that make up the FlowJob app ──
+    const MANIFEST = {
+      '': ['.nojekyll', 'index.html', 'style.css', 'app.js', 'icons.js', 'manifest.json',
+            'sw.js', 'signature.js', 'vercel.json', 'README.md'],
+      'assets': ['icon.svg', 'logo.svg', 'flowjob-logo.jpg'],
+      'pages': [
+        'customer-detail.js', 'customers.js', 'dashboard.js', 'discounts.js',
+        'eod.js', 'export.js', 'followups.js', 'inventory.js', 'invoices.js',
+        'maintenance.js', 'mileage.js', 'quote-request.js', 'quotes.js',
+        'rates.js', 'scheduler.js', 'settings.js', 'storage.js', 'tracker.js', 'warranty.js'
+      ],
+      'modules': [
+        'calendar-integration.js', 'contract-legal.js', 'data-dashboard.js',
+        'email-marketing.js', 'employee-management.js', 'insurance-claims.js',
+        'job-site-reporter.js', 'membership-subscription.js', 'paxeer-swap.js',
+        'payment-settings.js', 'plumbing-estimator.js', 'price-book-manager.js',
+        'review-reputation.js', 'service-history.js', 'warranty-tracker.js'
+      ],
+      'data': ['flat-rates.js']
+    };
+
+    // Binary file extensions (skip size-comparison, use base64)
+    const BINARY_EXT = ['.jpg', '.jpeg', '.png', '.gif', '.ico', '.woff', '.woff2', '.ttf'];
+    function isBinary(path) {
+      const ext = path.substring(path.lastIndexOf('.')).toLowerCase();
+      return BINARY_EXT.includes(ext);
+    }
+
+    const API = 'https://api.github.com';
+    let dirHandle = null;
+    let fileMap = {}; // { 'pages/quotes.js': File }
+
+    function log(msg, cls = '') {
+      const el = document.getElementById('log');
+      el.innerHTML += `<div class="${cls}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function saveToken() {
+      localStorage.setItem('flowjob_github_token', document.getElementById('token').value);
+      log('✅ Token saved', 'ok');
+    }
+
+    function loadToken() {
+      const t = localStorage.getItem('flowjob_github_token');
+      if (t) { document.getElementById('token').value = t; log('📂 Token loaded', 'info'); }
+      else log('No saved token found', 'warn');
+    }
+
+    async function pickFolder() {
+      try {
+        dirHandle = await window.showDirectoryPicker({ mode: 'read' });
+        document.getElementById('pick-btn').textContent = `📂 ${dirHandle.name}`;
+        document.getElementById('folder-status').textContent = `Selected: ${dirHandle.name}`;
+
+        fileMap = {};
+        let totalSize = 0;
+        let dirs = 0;
+        const tree = [];
+
+        for (const [dir, files] of Object.entries(MANIFEST)) {
+          const prefix = dir ? `${dir}/` : '';
+          const displayDir = dir || '(root)';
+          let dirLines = [];
+
+          let handle = dirHandle;
+          if (dir) {
+            try {
+              handle = await dirHandle.getDirectoryHandle(dir);
+              dirs++;
+            } catch (e) {
+              tree.push(`<span class="dir">📁 ${displayDir}/</span> <span style="color:#f87171">NOT FOUND</span>`);
+              continue;
+            }
+          }
+
+          for (const name of files) {
+            const path = prefix + name;
+            try {
+              const fileHandle = await handle.getFileHandle(name);
+              const file = await fileHandle.getFile();
+              fileMap[path] = file;
+              totalSize += file.size;
+              const sizeStr = file.size > 1024 ? `${(file.size/1024).toFixed(1)}KB` : `${file.size}B`;
+              dirLines.push(`  ✅ ${name} <span style="color:rgba(255,255,255,0.25)">(${sizeStr})</span>`);
+            } catch (e) {
+              dirLines.push(`  ⚠️ ${name} <span style="color:#f87171">missing</span>`);
+            }
+          }
+
+          tree.push(`<span class="dir">📁 ${displayDir}/</span>`);
+          tree.push(...dirLines);
+        }
+
+        const fileCount = Object.keys(fileMap).length;
+        document.getElementById('stat-count').textContent = fileCount;
+        document.getElementById('stat-size').textContent = (totalSize / 1024).toFixed(0);
+        document.getElementById('stat-dirs').textContent = dirs;
+        document.getElementById('file-tree').innerHTML = tree.join('<br>');
+        document.getElementById('preview-card').style.display = 'block';
+        document.getElementById('deploy-btn').disabled = fileCount === 0;
+
+        log(`📂 Loaded ${fileCount} files (${(totalSize/1024).toFixed(0)}KB) from ${dirHandle.name}`, 'ok');
+      } catch (e) {
+        if (e.name !== 'AbortError') log(`❌ ${e.message}`, 'err');
+      }
+    }
+
+    async function getFileSHA(repo, path, token) {
+      const res = await fetch(`${API}/repos/${repo}/contents/${path}?ref=main`, {
+        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error(`GET SHA ${path}: ${res.status}`);
+      return (await res.json()).sha;
+    }
+
+    async function pushFile(repo, path, content, token, sha, isBinary = false) {
+      const body = {
+        message: `deploy: ${path}`,
+        branch: 'main'
+      };
+
+      if (isBinary) {
+        // Binary: read as base64
+        const reader = new FileReader();
+        const b64 = await new Promise(resolve => {
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.readAsDataURL(content);
+        });
+        body.content = b64;
+      } else {
+        body.content = btoa(unescape(encodeURIComponent(content)));
+      }
+
+      if (sha) body.sha = sha;
+
+      const res = await fetch(`${API}/repos/${repo}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`${path}: ${res.status} — ${err.message || 'unknown'}`);
+      }
+      return await res.json();
+    }
+
+    async function deploy() {
+      const token = document.getElementById('token').value.trim();
+      const repo = document.getElementById('repo').value.trim();
+      if (!token) return log('❌ Enter a GitHub token', 'err');
+      if (!dirHandle) return log('❌ Select a folder first', 'err');
+
+      const btn = document.getElementById('deploy-btn');
+      const progress = document.getElementById('progress');
+      const progressBar = document.getElementById('progress-bar');
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Deploying...';
+      progress.style.display = 'block';
+
+      const entries = Object.entries(fileMap);
+      const total = entries.length;
+
+      log('═══════════════════════════════════════', 'info');
+      log(`🚀 Full deploy: ${total} files → ${repo}`, 'info');
+      log('═══════════════════════════════════════', 'info');
+
+      let ok = 0, fail = 0, skipped = 0;
+
+      for (const [path, file] of entries) {
+        try {
+          const sha = await getFileSHA(repo, path, token);
+          const binary = isBinary(path);
+          const content = binary ? file : await file.text();
+
+          // Skip unchanged files (compare sizes)
+          if (sha) {
+            const res = await fetch(`${API}/repos/${repo}/contents/${path}?ref=main`, {
+              headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.size === file.size) {
+                log(`⏭️ ${path} — unchanged, skip`, 'warn');
+                skipped++;
+                progressBar.style.width = `${((ok + fail + skipped) / total) * 100}%`;
+                continue;
+              }
+            }
+          }
+
+          await pushFile(repo, path, content, token, sha, binary);
+          log(`✅ ${path}`, 'ok');
+          ok++;
+        } catch (e) {
+          log(`❌ ${path} — ${e.message}`, 'err');
+          fail++;
+        }
+
+        progressBar.style.width = `${((ok + fail + skipped) / total) * 100}%`;
+        // Rate limit buffer
+        await new Promise(r => setTimeout(r, 200));
+      }
+
+      log('', '');
+      log('═══════════════════════════════════════', 'info');
+      log(`🏁 Deploy complete!`, 'info');
+      log(`   ✅ ${ok} pushed · ⏭️ ${skipped} skipped · ❌ ${fail} failed`, ok > 0 ? 'ok' : 'err');
+      log(`   🔗 https://github.com/${repo}/tree/main`, 'ok');
+      log(`   🌐 https://jtjustinktaylor-lgtm.github.io/flowjob-app/`, 'ok');
+      log('═══════════════════════════════════════', 'info');
+
+      btn.disabled = false;
+      btn.textContent = '🚀 Deploy Everything';
+      setTimeout(() => progress.style.display = 'none', 3000);
+    }
+
+    window.addEventListener('DOMContentLoaded', loadToken);
+  </script>
+</body>
+</html>
