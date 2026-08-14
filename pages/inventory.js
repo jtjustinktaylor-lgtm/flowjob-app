@@ -51,7 +51,7 @@ Pages.inventory = function() {
         </select>
       </div>
       ${items.length === 0
-        ? '<div class="empty-state"><div class="icon">📦</div><h3>No parts in inventory</h3><p>Add your first part to start tracking</p></div>'
+        ? '<div class="empty-state"><div class="icon" id="empty-inventory"></div><h3>No parts in inventory</h3><p>Add your first part to start tracking</p></div>'
         : `<div class="table-wrap"><table id="inv-table">
             <thead><tr><th>Name</th><th>SKU</th><th>Category</th><th>Qty</th><th>Unit Cost</th><th>Value</th><th>Location</th><th>Status</th><th></th></tr></thead>
             <tbody>${items.sort((a,b) => a.name.localeCompare(b.name)).map(i => {
