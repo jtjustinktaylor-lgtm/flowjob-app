@@ -332,14 +332,16 @@ const App = {
       'nav-icon-invoices': 'invoices', 'nav-icon-scheduler': 'scheduler',
       'nav-icon-rates': 'rates', 'nav-icon-customers': 'customers',
       'nav-icon-tracker': 'tracker', 'nav-icon-maintenance': 'maintenance',
-      'nav-icon-discounts': 'discounts', 'nav-icon-quote-request': 'quoteRequest', 'nav-icon-warranty': 'warranty', 'nav-icon-followups': 'scheduler', 'nav-icon-eod': 'dashboard', 'nav-icon-settings': 'rates', 'nav-icon-mileage': 'tracker', 'nav-icon-inventory': 'tracker', 'nav-icon-export': 'invoices', 'cmd-icon': 'search',
-      'nav-icon-price-book': 'rates', 'nav-icon-memberships': 'customers',
-      'nav-icon-reviews': 'dashboard', 'nav-icon-email': 'invoices',
-      'nav-icon-contracts': 'quotes', 'nav-icon-insurance': 'warranty',
-      'nav-icon-employees': 'customers', 'nav-icon-analytics': 'tracker',
-      'nav-icon-estimator': 'wrench', 'nav-icon-paxeer': 'rates', 'nav-icon-photo-report': 'dashboard',
+      'nav-icon-discounts': 'discounts', 'nav-icon-quote-request': 'quoteRequest', 'nav-icon-warranty': 'warranty',
+      'nav-icon-followups': 'clock', 'nav-icon-eod': 'clipboard', 'nav-icon-settings': 'settings',
+      'nav-icon-mileage': 'car', 'nav-icon-inventory': 'box', 'nav-icon-export': 'download', 'cmd-icon': 'search',
+      'nav-icon-price-book': 'book', 'nav-icon-memberships': 'tag',
+      'nav-icon-reviews': 'star', 'nav-icon-email': 'mailNav',
+      'nav-icon-contracts': 'fileText', 'nav-icon-insurance': 'shield',
+      'nav-icon-employees': 'user', 'nav-icon-analytics': 'barChart',
+      'nav-icon-estimator': 'wrench', 'nav-icon-paxeer': 'rates', 'nav-icon-photo-report': 'camera',
       'nav-icon-warranty-tracker': 'warranty', 'nav-icon-service-history': 'customers', 'nav-icon-payment-settings': 'rates',
-      'nav-icon-storage': 'tracker',
+      'nav-icon-storage': 'box',
     };
     Object.entries(iconMap).forEach(([elId, iconName]) => {
       const el = document.getElementById(elId);
@@ -363,11 +365,14 @@ const App = {
       'stat-tracker-expenses': 'tracker',
       'stat-tracker-profit': 'tracker',
       'stat-tracker-month': 'scheduler',
-      'empty-scheduler': 'scheduler',
-      'empty-quotes': 'quotes',
-      'empty-customers': 'customers',
-      'empty-maintenance': 'maintenance',
-      'empty-discounts': 'discounts',
+      'empty-scheduler': 'emptyScheduler',
+      'empty-quotes': 'emptyQuotes',
+      'empty-customers': 'emptyCustomers',
+      'empty-maintenance': 'emptyMaintenance',
+      'empty-discounts': 'emptyDiscounts',
+      'empty-invoices': 'emptyInvoices',
+      'empty-inventory': 'emptyInventory',
+      'empty-notfound': 'emptyNotfound',
     };
     Object.entries(pageIconMap).forEach(([elId, iconName]) => {
       const el = document.getElementById(elId);
@@ -631,7 +636,7 @@ const App = {
       followups: 'Follow-Ups', inventory: 'Inventory', maintenance: 'Maintenance', warranty: 'Warranty',
       warrantyTracker: 'Warranties', serviceHistory: 'Service History', estimator: 'Estimator',
       'photo-report': 'Photo Reports', 'price-book': 'Price Book', memberships: 'Memberships',
-      employees: 'Employees', contracts: 'Contracts', insurance: 'Insurance', email: 'Email Marketing',
+      employees: 'Employees', contracts: 'Contracts', insurance: 'Insurance', 'email-marketing': 'Email Marketing',
       reviews: 'Reviews', analytics: 'Analytics', rates: 'Rates', discounts: 'Discounts',
       settings: 'Settings', export: 'Export', storage: 'Storage',
     };
@@ -650,7 +655,7 @@ const App = {
       if (PageInit && PageInit[baseRoute]) PageInit[baseRoute]();
       this.injectPageIcons();
     } else {
-      content.innerHTML = '<div class="empty-state"><div class="icon">🚧</div><h3>Page not found</h3></div>';
+      content.innerHTML = `<div class="empty-state"><div class="icon" id="empty-notfound"></div><h3>Page not found</h3></div>`;
     }
     // Scroll to top on page change
     content.scrollTop = 0;
