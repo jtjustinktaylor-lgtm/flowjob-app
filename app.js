@@ -649,7 +649,9 @@ const App = {
     const content = document.getElementById('content');
     // Support parameterized routes: try exact match first, then base route
     const baseRoute = hash.split('/')[0];
-    const renderer = Pages[hash] || Pages[baseRoute];
+    // Support: exact match → camelCase slash match → base route
+    const camelRoute = baseRoute + hash.split('/').slice(1).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join('');
+    const renderer = Pages[hash] || Pages[camelRoute] || Pages[baseRoute];
     if (renderer) {
       content.innerHTML = renderer();
       if (PageInit && PageInit[baseRoute]) PageInit[baseRoute]();
