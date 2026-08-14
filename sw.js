@@ -1,73 +1,136 @@
-const CACHE = 'flowjob-v5';
-const ASSETS = [
-  './', './index.html', './style.css', './app.js',
-  './icons.js', './signature.js', './data/flat-rates.js',
-  './pages/dashboard.js', './pages/quotes.js', './pages/invoices.js',
-  './pages/scheduler.js', './pages/rates.js', './pages/customers.js',
-  './pages/tracker.js', './pages/maintenance.js', './pages/discounts.js',
-  './pages/quote-request.js', './pages/eod.js', './pages/followups.js',
-  './pages/warranty.js', './pages/settings.js',
-  './pages/customer-detail.js', './pages/mileage.js',
-  './pages/inventory.js', './pages/export.js', './pages/storage.js',
-  './modules/calendar-integration.js', './modules/review-reputation.js',
-  './modules/email-marketing.js', './modules/contract-legal.js',
-  './modules/employee-management.js', './modules/insurance-claims.js',
-  './modules/membership-subscription.js', './modules/price-book-manager.js',
-  './modules/data-dashboard.js',
-  './manifest.json'
+const CACHE_NAME = 'flowjob-v5';
+const PRECACHE_URLS = [
+    '/',
+    '/index.html',
+    '/style.css',
+    '/app.js',
+    '/icons.js',
+    '/signature.js',
+    '/manifest.json',
+    '/data/flat-rates.js',
+    '/assets/icon.svg',
+    '/assets/icon-192.png',
+    '/assets/icon-512.png',
+    '/assets/icon-192-maskable.png',
+    '/assets/icon-512-maskable.png',
+    '/pages/dashboard.js',
+    '/pages/quotes.js',
+    '/pages/invoices.js',
+    '/pages/scheduler.js',
+    '/pages/customers.js',
+    '/pages/tracker.js',
+    '/pages/followups.js',
+    '/pages/eod.js',
+    '/pages/mileage.js',
+    '/pages/inventory.js',
+    '/pages/maintenance.js',
+    '/pages/warranty.js',
+    '/pages/discounts.js',
+    '/pages/rates.js',
+    '/pages/settings.js',
+    '/pages/export.js',
+    '/pages/storage.js',
+    '/pages/quote-request.js',
+    '/pages/customer-detail.js',
+    '/modules/calendar-integration.js',
+    '/modules/review-reputation.js',
+    '/modules/email-marketing.js',
+    '/modules/contract-legal.js',
+    '/modules/employee-management.js',
+    '/modules/insurance-claims.js',
+    '/modules/membership-subscription.js',
+    '/modules/price-book-manager.js',
+    '/modules/data-dashboard.js',
+    '/modules/plumbing-estimator.js',
+    '/modules/job-site-reporter.js',
+    '/modules/payment-settings.js',
+    '/modules/warranty-tracker.js',
+    '/modules/service-history.js'
 ];
 
-// Pre-cache on install
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(cache => {
-      return cache.addAll(ASSETS).catch(err => {
-        console.warn('Some assets failed to cache:', err);
-        // Cache what we can individually
-        return Promise.allSettled(
-          ASSETS.map(url => cache.add(url).catch(() => console.warn('Failed:', url)))
+// Install — precache all app shell + pages
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(PRECACHE_URLS))
+            .then(() => self.skipWaiting())
+    );
+});
+
+// Fetch — stale-while-revalidate for JS/CSS, network-first for everything else
+self.addEventListener('fetch', event => {
+    const url = new URL(event.request.url);
+
+    // Skip non-GET requests
+    if (event.request.method !== 'GET') return;
+
+    // Stale-while-revalidate for static assets (JS, CSS, images)
+    if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('.svg') || url.pathname.endsWith('.png')) {
+        event.respondWith(
+            caches.open(CACHE_NAME).then(cache => {
+                return cache.match(event.request).then(cached => {
+                    const fetchPromise = fetch(event.request).then(response => {
+                        if (response && response.status === 200) {
+                            cache.put(event.request, response.clone());
+                        }
+                        return response;
+                    }).catch(() => cached);
+
+                    return cached || fetchPromise;
+                });
+            })
         );
-      });
-    })
-  );
-  self.skipWaiting();
+        return;
+    }
+
+    // Network-first for HTML and everything else
+    event.respondWith(
+        fetch(event.request)
+            .then(response => {
+                if (response && response.status === 200) {
+                    const responseClone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, responseClone);
+                    });
+                }
+                return response;
+            })
+            .catch(() => caches.match(event.request))
+    );
 });
 
-// Clean old caches on activate
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.filter(k => k !== CACHE).map(k => caches.delete(k))
-    ))
-  );
-  self.clients.claim();
+// Activate — clean old caches and take control immediately
+self.addEventListener('activate', event => {
+    const cacheWhitelist = [CACHE_NAME];
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheWhitelist.indexOf(cacheName) === -1) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim())
+    );
 });
 
-// Stale-while-revalidate: serve cache fast, update in background
-self.addEventListener('fetch', e => {
-  // Only handle same-origin GET requests
-  if (e.request.method !== 'GET') return;
+// Push notification
+self.addEventListener('push', event => {
+    const options = {
+        body: event.data.text(),
+        icon: '/assets/icon.svg',
+        badge: '/assets/icon.svg'
+    };
+    event.waitUntil(
+        self.registration.showNotification('FlowJob', options)
+    );
+});
 
-  e.respondWith(
-    caches.open(CACHE).then(cache => {
-      return cache.match(e.request).then(cached => {
-        const fetchPromise = fetch(e.request).then(networkResponse => {
-          // Only cache valid same-origin responses
-          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-            cache.put(e.request, networkResponse.clone());
-          }
-          return networkResponse;
-        }).catch(() => {
-          // Network failed — return cached or fallback to index.html for navigation
-          if (e.request.mode === 'navigate') {
-            return cache.match('./index.html');
-          }
-          return cached;
-        });
-
-        // Return cached immediately if available, otherwise wait for network
-        return cached || fetchPromise;
-      });
-    })
-  );
+// Notification click
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow('/')
+    );
 });
