@@ -89,6 +89,48 @@ Pages.dashboard = function() {
       <button class="btn btn-sm btn-primary" onclick="window.location.hash='warranty'">Review</button>
     </div>` : ''}
 
+    ${(s.customers || []).length === 0 && (s.quotes || []).length === 0 && (s.invoices || []).length === 0 ? `
+    <div class="card" id="welcome-tutorial" style="margin-bottom:16px;border:2px solid var(--gold);background:linear-gradient(135deg, var(--gold-50) 0%, var(--card) 100%);position:relative;overflow:hidden">
+      <div style="position:absolute;top:-20px;right:-20px;font-size:80px;opacity:0.08;pointer-events:none">🔧</div>
+      <h2 style="margin-bottom:8px;font-size:20px">👋 Welcome to FlowJob!</h2>
+      <p style="color:var(--text-secondary);margin-bottom:16px;font-size:14px">Your all-in-one plumbing business manager. Here's how to get started:</p>
+      <div style="display:grid;gap:12px;margin-bottom:16px">
+        <div style="display:flex;gap:12px;align-items:start">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--navy-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">1</div>
+          <div>
+            <strong style="font-size:14px">Set up your business info</strong>
+            <p style="font-size:13px;color:var(--text-muted);margin-top:2px">Your name, phone, and address appear on quotes and invoices</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:start">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--navy-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">2</div>
+          <div>
+            <strong style="font-size:14px">Create your first quote</strong>
+            <p style="font-size:13px;color:var(--text-muted);margin-top:2px">Build professional quotes with material pricing and labor rates</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:start">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--navy-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">3</div>
+          <div>
+            <strong style="font-size:14px">Schedule jobs & track income</strong>
+            <p style="font-size:13px;color:var(--text-muted);margin-top:2px">Convert quotes to invoices, schedule jobs, and watch your profits grow</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:start">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--navy-dark);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">💡</div>
+          <div>
+            <strong style="font-size:14px">Works offline — your data stays on your device</strong>
+            <p style="font-size:13px;color:var(--text-muted);margin-top:2px">No account needed. Export backups anytime from Settings.</p>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="App.showOnboarding()">⚙️ Set Up Business Info</button>
+        <button class="btn btn-outline" onclick="document.getElementById('welcome-tutorial').style.display='none';localStorage.setItem('flowjob_tutorial_dismissed','1')">✕ Dismiss</button>
+      </div>
+    </div>
+    ` : ''}
+
     <div class="grid grid-4">
       <div class="stat-card">
         <div class="stat-icon" id="stat-today-jobs"></div>
@@ -220,6 +262,18 @@ Pages.dashboard = function() {
           <button class="btn btn-sm btn-outline" onclick="App.exportCSV('expenses')">📊 Expenses</button>
           <button class="btn btn-sm btn-outline" onclick="App.exportCSV('customers')">📊 Customers</button>
         </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;border-left:4px solid var(--gold)">
+      <div class="card-header"><h3>💬 Send Feedback</h3></div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Found a bug? Want a feature? Let us know — this app is built by plumbers, for plumbers.</p>
+      <div class="form-group" style="margin-bottom:10px">
+        <textarea class="form-control" id="feedback-text" rows="3" placeholder="What's on your mind? Bug reports, feature ideas, or just say hi..."></textarea>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary" onclick="App.sendFeedback()">Send Feedback</button>
+        <button class="btn btn-outline" onclick="Settings.shareViaEmail()">📧 Email Us Directly</button>
       </div>
     </div>`;
 };

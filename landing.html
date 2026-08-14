@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowJob — Free Plumbing Business Manager</title>
+  <meta name="description" content="Free offline-first plumbing business manager. Quotes, invoices, scheduling, mileage tracking, and more. No signup required.">
+  <meta name="theme-color" content="#0D1B2A">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold: #C9A84C;
+      --gold-light: #E0C872;
+      --navy: #1A2F4A;
+      --navy-dark: #0D1B2A;
+      --bg: #F4F6FA;
+      --text: #1C1F26;
+      --text-muted: #6B7280;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(160deg, #0D1B2A 0%, #1A2F4A 60%, #264570 100%);
+      color: white;
+      padding: 80px 24px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(201,168,76,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(201,168,76,0.05) 0%, transparent 40%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; max-width: 700px; margin: 0 auto; }
+    .hero-logo { width: 80px; height: 80px; margin: 0 auto 20px; }
+    .hero-logo img { width: 100%; height: 100%; }
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+    .hero h1 span { color: var(--gold); }
+    .hero .tagline {
+      font-size: 18px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 32px;
+      font-weight: 400;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gold);
+      color: var(--navy-dark);
+      font-size: 17px;
+      font-weight: 700;
+      padding: 16px 36px;
+      border-radius: 14px;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+    }
+    .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.4); }
+    .hero-sub { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.5); }
+
+    /* Social proof */
+    .social-proof {
+      background: white;
+      border-bottom: 1px solid #E2E5EC;
+      padding: 20px 24px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .social-proof strong { color: var(--text); }
+
+    /* Features */
+    .features {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+    .features-title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    .features-sub {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+      font-size: 15px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 24px;
+      border: 1px solid #E2E5EC;
+      transition: all 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      border-color: var(--gold);
+    }
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .feature-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* How it works */
+    .how-it-works {
+      background: white;
+      border-top: 1px solid #E2E5EC;
+      border-bottom: 1px solid #E2E5EC;
+      padding: 60px 24px;
+    }
+    .how-it-works .inner { max-width: 700px; margin: 0 auto; text-align: center; }
+    .how-it-works h2 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .how-it-works .sub { color: var(--text-muted); margin-bottom: 40px; font-size: 15px; }
+    .steps { display: grid; gap: 28px; text-align: left; }
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: start;
+    }
+    .step-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--navy-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .step h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .step p { font-size: 13px; color: var(--text-muted); }
+
+    /* Privacy */
+    .privacy {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 60px 24px;
+      text-align: center;
+    }
+    .privacy h2 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+    .privacy p { color: var(--text-muted); font-size: 15px; margin-bottom: 12px; }
+    .privacy-badges {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .privacy-badge {
+      background: white;
+      border: 1px solid #E2E5EC;
+      border-radius: 12px;
+      padding: 16px 20px;
+      text-align: center;
+      min-width: 140px;
+    }
+    .privacy-badge .icon { font-size: 28px; margin-bottom: 6px; }
+    .privacy-badge .label { font-size: 13px; font-weight: 600; }
+    .privacy-badge .desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* CTA */
+    .cta-section {
+      background: linear-gradient(160deg, #0D1B2A 0%, #1A2F4A 100%);
+      color: white;
+      text-align: center;
+      padding: 60px 24px;
+    }
+    .cta-section h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .cta-section p { color: rgba(255,255,255,0.6); margin-bottom: 28px; font-size: 15px; }
+    .cta-section .hero-cta { font-size: 16px; }
+
+    /* Footer */
+    footer {
+      background: #050E18;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+    }
+    footer a { color: var(--gold); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .hero { padding: 60px 20px 40px; }
+      .hero h1 { font-size: 30px; }
+      .hero .tagline { font-size: 15px; }
+      .hero-cta { font-size: 15px; padding: 14px 28px; }
+      .features-title, .how-it-works h2, .privacy h2, .cta-section h2 { font-size: 22px; }
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-logo"><img src="assets/icon.svg" alt="FlowJob"></div>
+      <h1><span>Flow</span>Job</h1>
+      <p class="tagline">The free plumbing business manager that works offline — on your phone, tablet, or laptop.</p>
+      <a href="index.html" class="hero-cta">🔧 Open FlowJob — It's Free</a>
+      <p class="hero-sub">No signup · No download · Works offline · Your data stays on your device</p>
+    </div>
+  </section>
+
+  <!-- Social Proof -->
+  <div class="social-proof">
+    Built <strong>by a plumber, for plumbers</strong> — no venture capital, no data harvesting, no BS.
+  </div>
+
+  <!-- Features -->
+  <section class="features">
+    <h2 class="features-title">Everything you need to run your plumbing business</h2>
+    <p class="features-sub">From quote to payment — all in one app that works even in a basement with no signal.</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>Professional Quotes</h3>
+        <p>Build detailed quotes with material pricing, labor rates, flat-rate menu, and markup. Convert to invoice in one tap.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>Invoicing & Payments</h3>
+        <p>Generate invoices, track payment status, send reminders. Supports e-transfer, cash, cheque, and card.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h3>Job Scheduling</h3>
+        <p>Schedule jobs with time, address, and notes. See your day at a glance. Never miss an appointment.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Profit Tracker</h3>
+        <p>Track revenue vs expenses by month. Know your actual profit — not just what's in your bank account.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👤</div>
+        <h3>Customer Management</h3>
+        <p>Keep customer records, job history, and notes. Search and filter. Never forget a repeat customer's details.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔧</div>
+        <h3>Maintenance Plans</h3>
+        <p>Sell recurring maintenance memberships. Track visits, automate follow-ups, and build recurring revenue.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📸</div>
+        <h3>Photo Reports</h3>
+        <p>Document job sites with before/after photos. Generate professional PDF reports for insurance claims.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚗</div>
+        <h3>Mileage Tracking</h3>
+        <p>Log business trips with start/end odometer. Export for tax deductions. One less receipt to lose.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h3>Inventory</h3>
+        <p>Track materials and parts. Know what's on the truck. Set reorder alerts so you never run out mid-job.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works">
+    <div class="inner">
+      <h2>How it works</h2>
+      <p class="sub">Three steps. No account. No credit card. No catch.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>Open the app</h3>
+            <p>Tap the link on your phone. That's it — the app loads instantly and installs itself as a home screen icon.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>Enter your business info</h3>
+            <p>Your name, phone, address. This appears on your quotes and invoices. Takes 30 seconds.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3>Start creating quotes</h3>
+            <p>Pick from the built-in flat-rate plumbing menu or enter custom line items. Convert to invoice when the job's done.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Privacy -->
+  <section class="privacy">
+    <h2>Your data is yours. Period.</h2>
+    <p>FlowJob stores everything on your device. No server, no cloud, no account. We can't see your data — and neither can anyone else.</p>
+
+    <div class="privacy-badges">
+      <div class="privacy-badge">
+        <div class="icon">🔒</div>
+        <div class="label">100% Local</div>
+        <div class="desc">Data stays on your device</div>
+      </div>
+      <div class="privacy-badge">
+        <div class="icon">🚫</div>
+        <div class="label">No Tracking</div>
+        <div class="desc">Zero analytics or cookies</div>
+      </div>
+      <div class="privacy-badge">
+        <div class="icon">📴</div>
+        <div class="label">Works Offline</div>
+        <div class="desc">No internet required</div>
+      </div>
+      <div class="privacy-badge">
+        <div class="icon">💾</div>
+        <div class="label">Easy Backup</div>
+        <div class="desc">Export anytime as JSON</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Ready to ditch the spreadsheets?</h2>
+    <p>Join plumbers who've already made the switch to FlowJob.</p>
+    <a href="index.html" class="hero-cta">🔧 Open FlowJob — It's Free</a>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>FlowJob — Plumbing Business Manager &nbsp;·&nbsp; <a href="https://github.com/jtjustinktaylor-lgtm/flowjob-app">GitHub</a> &nbsp;·&nbsp; Free & Open Source &nbsp;·&nbsp; Built with 🔧 by a plumber</p>
+  </footer>
+
+</body>
+</html>

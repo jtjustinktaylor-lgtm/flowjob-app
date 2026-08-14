@@ -81,6 +81,21 @@ Pages.settings = function() {
       <p style="font-size:12px;color:var(--text-muted);margin-top:8px">Storage used: ${stateSize} KB</p>
     </div>
 
+    <div class="card" style="margin-bottom:16px;border-left:4px solid var(--success)">
+      <h3 style="margin-bottom:12px">📢 Share FlowJob</h3>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px">
+        Know a plumber who could use this? Share FlowJob — it's free, works offline, and each person gets their own private workspace. No signup required.
+      </p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn btn-primary" onclick="Settings.copyShareLink()">📋 Copy Link</button>
+        <button class="btn btn-outline" onclick="Settings.shareViaText()">💬 Share via Text</button>
+        <button class="btn btn-outline" onclick="Settings.shareViaEmail()">📧 Share via Email</button>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-family:monospace;word-break:break-all;color:var(--text-secondary)" id="share-url-display">
+        ${window.location.origin}${window.location.pathname}
+      </div>
+    </div>
+
     <div class="card" style="border-color:var(--danger,#dc3545)">
       <h3 style="margin-bottom:12px;color:var(--danger,#dc3545)">⚠️ Danger Zone</h3>
       <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px">These actions cannot be undone. Export your data first.</p>
@@ -115,6 +130,48 @@ const Settings = {
     if (!(await App.confirm('Are you absolutely sure? This cannot be undone.'))) return;
     localStorage.removeItem('flowjob_state');
     location.reload();
+  },
+
+  getShareUrl() {
+    return window.location.origin + window.location.pathname;
+  },
+
+  getShareMessage() {
+    return 'Check out FlowJob — free plumbing business manager. Works offline, no signup needed. Quotes, invoices, scheduling, and more. Each plumber gets their own private workspace.';
+  },
+
+  async copyShareLink() {
+    const url = this.getShareUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+      App.toast('📋 Link copied to clipboard!');
+    } catch (e) {
+      // Fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      App.toast('📋 Link copied!');
+    }
+  },
+
+  shareViaText() {
+    const msg = this.getShareMessage() + '\n' + this.getShareUrl();
+    if (navigator.share) {
+      navigator.share({ title: 'FlowJob — Plumbing Business Manager', text: msg, url: this.getShareUrl() })
+        .catch(() => {});
+    } else {
+      // Fallback: open SMS
+      window.open('sms:?body=' + encodeURIComponent(msg), '_self');
+    }
+  },
+
+  shareViaEmail() {
+    const subject = encodeURIComponent('FlowJob — Free Plumbing Business Manager');
+    const body = encodeURIComponent(this.getShareMessage() + '\n\n' + this.getShareUrl());
+    window.open('mailto:?subject=' + subject + '&body=' + body, '_self');
   }
 };
 

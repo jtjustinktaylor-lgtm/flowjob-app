@@ -79,6 +79,13 @@ const App = {
     if (!this.state.businessInfo) {
       this.showOnboarding();
     }
+    // Beta tester welcome toast (first visit after update)
+    if (!localStorage.getItem('flowjob_v6_welcome')) {
+      setTimeout(() => {
+        this.toast('👋 Welcome! FlowJob is free & works offline. Each plumber gets their own workspace — no signup needed.', 'info', 6000);
+        localStorage.setItem('flowjob_v6_welcome', '1');
+      }, 2000);
+    }
   },
 
   saveState() {
@@ -296,6 +303,20 @@ const App = {
     input.click();
   },
 
+  // --- Feedback ---
+  sendFeedback() {
+    const textarea = document.getElementById('feedback-text');
+    const msg = (textarea?.value || '').trim();
+    if (!msg) { this.toast('Please write something first!', 'warning'); return; }
+    // Open mailto with pre-filled feedback
+    const biz = this.getBusinessInfo();
+    const subject = encodeURIComponent('FlowJob Feedback — ' + (biz.contact || 'User'));
+    const body = encodeURIComponent(msg + '\n\n---\nUser: ' + (biz.contact || 'Unknown') + '\nBusiness: ' + (biz.name || 'N/A') + '\nDate: ' + new Date().toISOString());
+    window.open('mailto:jtjustinktaylor-lgtm@protonmail.com?subject=' + subject + '&body=' + body, '_self');
+    textarea.value = '';
+    this.toast('📧 Opening email client...');
+  },
+
   // --- Overdue Invoice Detection ---
   checkOverdue() {
     const today = this.today();
@@ -456,6 +477,8 @@ const App = {
       { id: '_newJob', label: 'Schedule Job', hint: 'Quick action' },
       { id: '_newCustomer', label: 'Add Customer', hint: 'Quick action' },
       { id: '_toggleTheme', label: 'Toggle Dark Mode', hint: 'Appearance' },
+      { id: '_share', label: 'Share FlowJob', hint: 'Tell a plumber friend' },
+      { id: '_feedback', label: 'Send Feedback', hint: 'Bug reports & feature requests' },
     ];
 
     const allItems = [...pages, ...actions];
@@ -491,6 +514,8 @@ const App = {
       else if (id === '_newJob') { window.location.hash = 'scheduler'; setTimeout(() => Scheduler.addJob(), 200); }
       else if (id === '_newCustomer') { window.location.hash = 'customers'; setTimeout(() => Customers.new(), 200); }
       else if (id === '_toggleTheme') { document.getElementById('dark-mode-toggle')?.click(); }
+      else if (id === '_share') { Settings.copyShareLink(); }
+      else if (id === '_feedback') { window.location.hash = 'dashboard'; setTimeout(() => { const el = document.getElementById('feedback-text'); if (el) { el.scrollIntoView({ behavior: 'smooth' }); el.focus(); } }, 300); }
       else { window.location.hash = id; }
     };
 
