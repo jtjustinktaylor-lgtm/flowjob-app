@@ -13,7 +13,7 @@ Pages.quotes = function() {
       </select>
     </div>
     ${quotes.length === 0
-      ? '<div class="card"><div class="empty-state"><div class="icon">📋</div><h3>No quotes yet</h3><p>Create your first quote to get started</p></div></div>'
+      ? '<div class="card"><div class="empty-state"><div class="icon" id="empty-quotes"></div><h3>No quotes yet</h3><p>Create your first quote to get started</p></div></div>'
       : `<div class="card"><div class="table-wrap"><table id="quote-table">
         <thead><tr><th>#</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>${quotes.map(q => `<tr class="quote-row" data-customer="${App.esc((q.customer||'').toLowerCase())}" data-status="${q.status}" data-number="${q.number}">
