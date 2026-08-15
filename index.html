@@ -45,6 +45,8 @@
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
     }
 
     /* Animations */
@@ -90,7 +92,7 @@
       padding: 100px 24px 80px;
       text-align: center;
       position: relative;
-      overflow: hidden;
+      min-height: auto;
     }
     .hero::before {
       content: '';
@@ -450,11 +452,6 @@
       <p class="tagline">The free plumbing business manager that works offline — on your phone, tablet, or laptop.</p>
       <a href="app.html" class="hero-cta">🔧 Open FlowJob — It's Free</a>
       <p class="hero-sub">No signup · No download · Works offline · Your data stays on your device</p>
-    </div>
-    <div class="scroll-indicator">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 5v14M19 12l-7 7-7-7"/>
-      </svg>
     </div>
   </section>
 
