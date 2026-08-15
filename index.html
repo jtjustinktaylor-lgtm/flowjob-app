@@ -75,8 +75,8 @@
 
     .animate-on-scroll {
       opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.4s ease-out;
+      transform: translateY(15px);
+      transition: all 0.3s ease-out;
     }
     .animate-on-scroll.visible {
       opacity: 1;
@@ -465,8 +465,8 @@
 
   <!-- Features -->
   <section class="features">
-    <h2 class="features-title animate-on-scroll">Everything you need to run your plumbing business</h2>
-    <p class="features-sub animate-on-scroll">From quote to payment — all in one app that works even in a basement with no signal.</p>
+    <h2 class="features-title">Everything you need to run your plumbing business</h2>
+    <p class="features-sub">From quote to payment — all in one app that works even in a basement with no signal.</p>
 
     <div class="feature-grid">
       <div class="feature-card animate-on-scroll">
@@ -612,7 +612,7 @@
 
     // Observe all animate-on-scroll elements
     document.querySelectorAll('.animate-on-scroll').forEach((el, index) => {
-      el.dataset.delay = index * 100;
+      el.dataset.delay = index * 50; // Faster stagger
       observer.observe(el);
     });
 
