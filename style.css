@@ -771,7 +771,7 @@ tr:last-child td { border-bottom: none; }
     display: flex !important;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 60px;
+    height: 64px;
     background: var(--card);
     border-top: 1px solid var(--border);
     z-index: 90;
@@ -801,7 +801,7 @@ tr:last-child td { border-bottom: none; }
   .bottom-nav-item svg { width: 22px; height: 22px; }
 
   /* Content padding for bottom nav */
-  #content { padding-bottom: 72px; }
+  #content { padding-bottom: 84px !important; }
 }
 
 /* Sidebar Overlay (mobile) */
