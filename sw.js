@@ -1,8 +1,8 @@
-const CACHE_NAME = 'flowjob-v6';
+const CACHE_NAME = 'flowjob-v7';
 const PRECACHE_URLS = [
     '/',
     '/index.html',
-    '/landing.html',
+    '/app.html',
     '/style.css',
     '/app.js',
     '/icons.js',
